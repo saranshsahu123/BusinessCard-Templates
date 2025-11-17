@@ -9,7 +9,6 @@ import TermsOfUse from "./pages/TermsOfUse";
 import FAQ from "./pages/FAQ";
 import { RequireAuth, RequireAdmin } from "./components/RouteGuards";
 import AdminLayout from "./pages/admin/AdminLayout";
-import Payments from "./pages/admin/Payments";
 import TemplatesList from "./pages/admin/TemplatesList";
 import NewTemplate from "./pages/admin/NewTemplate";
 import EditTemplate from "./pages/admin/EditTemplate";
@@ -17,6 +16,8 @@ import ContactMessages from "./pages/admin/ContactMessages";
 import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import PaymentsPage from "@/pages/admin/PaymentsPage";
+
 
 export const router = createBrowserRouter(
   [
@@ -74,7 +75,7 @@ export const router = createBrowserRouter(
                 { path: "templates", element: <TemplatesList /> },
                 { path: "templates/new", element: <NewTemplate /> },
                 { path: "templates/:id/edit", element: <EditTemplate /> },
-                { path: "payments", element: <Payments /> },
+                { path: "payments", element: <PaymentsPage /> },
               ],
             },
           ],
