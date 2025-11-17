@@ -18,7 +18,7 @@ declare global {
 export default function CheckoutPage() {
   const { items, total, clear } = useCart();
   const navigate = useNavigate();
-  const { user } = useAuth();      // ⬅️ yeh line add karo
+  const { user, loading } = useAuth();
   const [processing, setProcessing] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
 
@@ -31,11 +31,13 @@ export default function CheckoutPage() {
   const [pincode, setPincode] = useState("");
 
   const primaryItem = items[0];
-  const effectiveNameDisplay = customerName.trim() || primaryItem?.data?.name || "";
-  const effectivePhoneDisplay = customerPhone.trim() || primaryItem?.data?.phone || "";
+  const effectiveNameDisplay =
+    customerName.trim() || primaryItem?.data?.name || "";
+  const effectivePhoneDisplay =
+    customerPhone.trim() || primaryItem?.data?.phone || "";
 
   const trimmedPincode = pincode.trim();
-  const isPincodeValid = /^[1-9][0-9]{5}$/.test(trimmedPincode); // simple 6-digit Indian pincode
+  const isPincodeValid = /^[1-9][0-9]{5}$/.test(trimmedPincode);
 
   const isFormValid = !!(
     effectiveNameDisplay &&
@@ -48,6 +50,13 @@ export default function CheckoutPage() {
 
   const frontRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const backRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  // Modals
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [pendingAddress, setPendingAddress] = useState("");
+  const [pendingName, setPendingName] = useState("");
+  const [pendingPhone, setPendingPhone] = useState("");
 
   async function getLiveLocationString(): Promise<string | null> {
     if (!("geolocation" in navigator)) return null;
@@ -69,39 +78,52 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    if (items.length === 0) return;
-  }, [items.length]);
-
-  async function onPay() {
-    if (processing || items.length === 0) return;
-
-    setShowErrors(true);
-
-    const effectiveName = customerName.trim() || primaryItem?.data?.name || "";
-    const effectivePhone = customerPhone.trim() || primaryItem?.data?.phone || "";
-
-    if (!effectiveName || !effectivePhone || !addressLine1.trim() || !city.trim() || !state.trim() || !pincode.trim()) {
-      alert("Please fill all required address details before payment.");
+    // cart empty hai to checkout ka koi sense nahi
+    if (items.length === 0) {
+      navigate("/cart");
       return;
     }
+    // jab tak auth loading hai, kuch mat karo
+  }, [items.length, navigate]);
 
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      setShowLoginModal(true);
+    }
+  }, [user, loading]);
+
+  const handleLoginConfirm = () => {
+    setShowLoginModal(false);
+    navigate("/login");
+  };
+
+  const handleLoginCancel = () => {
+    setShowLoginModal(false);
+    navigate("/"); // ya "/cart"
+  };
+
+  const handleAddressConfirm = () => {
+    setShowAddressModal(false);
+    startPayment(pendingName, pendingPhone);
+  };
+
+  const handleAddressCancel = () => {
+    setShowAddressModal(false);
+  };
+
+  async function startPayment(customer_name: string, customer_phone: string) {
     setProcessing(true);
 
     try {
-      // 1) Backend se Razorpay order create karo
       const res = await apiFetch("/payments/create-order", {
         method: "POST",
         body: JSON.stringify({
-          // yahan tum apna pricing decide kar sakte ho
-          // total dollars ko rupees maan rahe hain, agar INR use kar rahe ho:
-          amount: Math.round(total), // e.g. 199
+          amount: Math.round(total),
         }),
       });
 
       const { order } = res as any;
-
-      const customer_name = effectiveName;
-      const customer_phone = effectivePhone;
       const live_location = await getLiveLocationString();
 
       const options = {
@@ -135,7 +157,6 @@ export default function CheckoutPage() {
             });
 
             if ((verifyRes as any).success) {
-              // Payment OK → cards download + clear cart
               for (const it of items) {
                 const fid = it.id;
                 const f = frontRefs.current[fid];
@@ -169,32 +190,88 @@ export default function CheckoutPage() {
     }
   }
 
+  async function onPay() {
+    if (processing || items.length === 0) return;
+
+    // extra safety guard
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    setShowErrors(true);
+
+    const effectiveName =
+      customerName.trim() || primaryItem?.data?.name || "";
+    const effectivePhone =
+      customerPhone.trim() || primaryItem?.data?.phone || "";
+
+    if (
+      !effectiveName ||
+      !effectivePhone ||
+      !addressLine1.trim() ||
+      !city.trim() ||
+      !state.trim() ||
+      !pincode.trim()
+    ) {
+      alert("Please fill all required address details before payment.");
+      return;
+    }
+
+    const deliveryAddress = [
+      effectiveName,
+      addressLine1,
+      addressLine2,
+      city,
+      state,
+      pincode,
+    ]
+      .filter((x) => x && x.trim())
+      .join(", ");
+
+    setPendingAddress(deliveryAddress);
+    setPendingName(effectiveName);
+    setPendingPhone(effectivePhone);
+    setShowAddressModal(true);
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/40">
       <main className="container mx-auto max-w-4xl px-4 py-10">
         <div className="mb-6 space-y-2">
           <h1 className="text-3xl font-bold">Checkout</h1>
-          <p className="text-sm text-muted-foreground">Review your details and complete your secure payment.</p>
+          <p className="text-sm text-muted-foreground">
+            Review your details and complete your secure payment.
+          </p>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold">1</div>
+              <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold">
+                1
+              </div>
               <span>Customer Details</span>
             </div>
             <div className="h-px w-8 bg-border" />
             <div className="flex items-center gap-2 opacity-80">
-              <div className="w-6 h-6 rounded-full border flex items-center justify-center text-xs font-semibold">2</div>
+              <div className="w-6 h-6 rounded-full border flex items-center justify-center text-xs font-semibold">
+                2
+              </div>
               <span>Payment</span>
             </div>
           </div>
         </div>
+
         {items.length === 0 ? (
           <div className="text-muted-foreground">Your cart is empty.</div>
         ) : (
           <>
             <div className="grid gap-8 mb-10 md:grid-cols-[2fr,1.5fr]">
               <div className="space-y-4 border rounded-xl p-4 md:p-5 bg-card shadow-sm">
-                <h2 className="text-lg font-semibold mb-1">Shipping Details</h2>
-                <p className="text-xs text-muted-foreground mb-1">We'll use these details to deliver your printed cards.</p>
+                <h2 className="text-lg font-semibold mb-1">
+                  Shipping Details
+                </h2>
+                <p className="text-xs text-muted-foreground mb-1">
+                  We'll use these details to deliver your printed cards.
+                </p>
                 <div className="grid gap-3">
                   <div className="grid gap-1">
                     <label className="text-sm font-medium">Full Name *</label>
@@ -205,7 +282,9 @@ export default function CheckoutPage() {
                       placeholder={primaryItem?.data?.name || "Your Name"}
                     />
                     {showErrors && !effectiveNameDisplay && (
-                      <p className="text-xs text-red-500 mt-1">Full name is required.</p>
+                      <p className="text-xs text-red-500 mt-1">
+                        Full name is required.
+                      </p>
                     )}
                   </div>
                   <div className="grid gap-1">
@@ -217,11 +296,15 @@ export default function CheckoutPage() {
                       placeholder={primaryItem?.data?.phone || "Phone number"}
                     />
                     {showErrors && !effectivePhoneDisplay && (
-                      <p className="text-xs text-red-500 mt-1">Phone number is required.</p>
+                      <p className="text-xs text-red-500 mt-1">
+                        Phone number is required.
+                      </p>
                     )}
                   </div>
                   <div className="grid gap-1">
-                    <label className="text-sm font-medium">Address Line 1 *</label>
+                    <label className="text-sm font-medium">
+                      Address Line 1 *
+                    </label>
                     <input
                       className="border rounded px-3 py-2 text-sm"
                       value={addressLine1}
@@ -229,11 +312,15 @@ export default function CheckoutPage() {
                       placeholder="House / Flat, Street"
                     />
                     {showErrors && !addressLine1.trim() && (
-                      <p className="text-xs text-red-500 mt-1">Address line 1 is required.</p>
+                      <p className="text-xs text-red-500 mt-1">
+                        Address line 1 is required.
+                      </p>
                     )}
                   </div>
                   <div className="grid gap-1">
-                    <label className="text-sm font-medium">Address Line 2</label>
+                    <label className="text-sm font-medium">
+                      Address Line 2
+                    </label>
                     <input
                       className="border rounded px-3 py-2 text-sm"
                       value={addressLine2}
@@ -243,41 +330,79 @@ export default function CheckoutPage() {
                   </div>
                   <div className="grid gap-3 md:grid-cols-1">
                     <div className="grid gap-1">
-                      <label className="text-sm font-medium">City *</label>
+                      <label className="text-sm font-medium">
+                        City *
+                      </label>
                       <input
                         className="border rounded px-3 py-2 text-sm"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
                       />
                       {showErrors && !city.trim() && (
-                        <p className="text-xs text-red-500 mt-1">City is required.</p>
+                        <p className="text-xs text-red-500 mt-1">
+                          City is required.
+                        </p>
                       )}
                     </div>
                     <div className="grid gap-1">
-                      <label className="text-sm font-medium">State *</label>
+                      <label className="text-sm font-medium">
+                        State *
+                      </label>
                       <select
                         className="border rounded px-3 py-2 text-sm bg-background"
                         value={state}
                         onChange={(e) => setState(e.target.value)}
                       >
                         <option value="">Select state</option>
+                        {/* States */}
                         <option value="Andhra Pradesh">Andhra Pradesh</option>
-                        <option value="Delhi">Delhi</option>
+                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                        <option value="Assam">Assam</option>
+                        <option value="Bihar">Bihar</option>
+                        <option value="Chhattisgarh">Chhattisgarh</option>
+                        <option value="Goa">Goa</option>
                         <option value="Gujarat">Gujarat</option>
+                        <option value="Haryana">Haryana</option>
+                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                        <option value="Jharkhand">Jharkhand</option>
                         <option value="Karnataka">Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <option value="Madhya Pradesh">Madhya Pradesh</option>
                         <option value="Maharashtra">Maharashtra</option>
+                        <option value="Manipur">Manipur</option>
+                        <option value="Meghalaya">Meghalaya</option>
+                        <option value="Mizoram">Mizoram</option>
+                        <option value="Nagaland">Nagaland</option>
+                        <option value="Odisha">Odisha</option>
+                        <option value="Punjab">Punjab</option>
                         <option value="Rajasthan">Rajasthan</option>
+                        <option value="Sikkim">Sikkim</option>
                         <option value="Tamil Nadu">Tamil Nadu</option>
                         <option value="Telangana">Telangana</option>
+                        <option value="Tripura">Tripura</option>
                         <option value="Uttar Pradesh">Uttar Pradesh</option>
+                        <option value="Uttarakhand">Uttarakhand</option>
                         <option value="West Bengal">West Bengal</option>
+                        {/* Union Territories */}
+                        <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                        <option value="Chandigarh">Chandigarh</option>
+                        <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                        <option value="Delhi">Delhi</option>
+                        <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                        <option value="Ladakh">Ladakh</option>
+                        <option value="Lakshadweep">Lakshadweep</option>
+                        <option value="Puducherry">Puducherry</option>
                       </select>
                       {showErrors && !state.trim() && (
-                        <p className="text-xs text-red-500 mt-1">State is required.</p>
+                        <p className="text-xs text-red-500 mt-1">
+                          State is required.
+                        </p>
                       )}
                     </div>
                     <div className="grid gap-1">
-                      <label className="text-sm font-medium">Pincode *</label>
+                      <label className="text-sm font-medium">
+                        Pincode *
+                      </label>
                       <input
                         className="border rounded px-3 py-2 text-sm"
                         value={pincode}
@@ -287,7 +412,9 @@ export default function CheckoutPage() {
                         pattern="[0-9]*"
                       />
                       {showErrors && !isPincodeValid && (
-                        <p className="text-xs text-red-500 mt-1">Enter a valid 6-digit pincode.</p>
+                        <p className="text-xs text-red-500 mt-1">
+                          Enter a valid 6-digit pincode.
+                        </p>
                       )}
                     </div>
                   </div>
@@ -312,44 +439,75 @@ export default function CheckoutPage() {
                 <div className="border rounded-xl p-4 bg-card shadow-sm space-y-3">
                   <div className="flex items-center justify-between mb-1">
                     <h2 className="text-sm font-semibold">Order Summary</h2>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-600/90 text-emerald-50 border border-emerald-700">Secure payment</span>
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-600/90 text-emerald-50 border border-emerald-700">
+                      Secure payment
+                    </span>
                   </div>
                   <div className="space-y-2">
                     {items.map((it) => (
-                      <div key={it.id} className="flex items-center justify-between text-sm">
+                      <div
+                        key={it.id}
+                        className="flex items-center justify-between text-sm"
+                      >
                         <div>
                           <div className="font-medium">{it.id}</div>
-                          <div className="text-xs text-muted-foreground">{it.data?.name || "Your Name"} • {it.data?.company || "Company"}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {it.data?.name || "Your Name"} •{" "}
+                            {it.data?.company || "Company"}
+                          </div>
                         </div>
-                        <div className="text-sm font-medium">₹{it.price.toFixed(2)}</div>
+                        <div className="text-sm font-medium">
+                          ₹{it.price.toFixed(2)}
+                        </div>
                       </div>
                     ))}
                   </div>
                   <div className="flex items-center justify-between border-t pt-3 mt-2 text-sm">
                     <div className="font-semibold">Total</div>
-                    <div className="font-semibold">₹{total.toFixed(2)}</div>
+                    <div className="font-semibold">
+                      ₹{total.toFixed(2)}
+                    </div>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-1">Payments are processed securely via Razorpay.</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    Payments are processed securely via Razorpay.
+                  </p>
                 </div>
               </div>
             </div>
+
             <div className="flex items-center justify-end gap-2 mb-4 md:mb-10">
-              <Button variant="outline" onClick={() => navigate("/cart")}>Back to Cart</Button>
+              <Button variant="outline" onClick={() => navigate("/cart")}>
+                Back to Cart
+              </Button>
               <Button
                 onClick={onPay}
                 disabled={processing || !isFormValid}
               >
-                {processing ? "Processing..." : isFormValid ? "Pay Now" : "Complete details to pay"}
+                {processing
+                  ? "Processing..."
+                  : isFormValid
+                  ? "Pay Now"
+                  : "Complete details to pay"}
               </Button>
             </div>
 
-            <div style={{ position: "absolute", left: -99999, top: -99999 }}>
+            <div
+              style={{
+                position: "absolute",
+                left: -99999,
+                top: -99999,
+              }}
+            >
               {items.map((it) => {
                 const config = byId[it.id];
                 if (!config) return null;
                 return (
                   <div key={it.id}>
-                    <div ref={(el) => { frontRefs.current[it.id] = el; }}>
+                    <div
+                      ref={(el) => {
+                        frontRefs.current[it.id] = el;
+                      }}
+                    >
                       <ClassicCard
                         data={it.data}
                         config={config}
@@ -359,11 +517,18 @@ export default function CheckoutPage() {
                         accentColor={it.accentColor}
                       />
                     </div>
-                    <div ref={(el) => { backRefs.current[it.id] = el; }}>
+                    <div
+                      ref={(el) => {
+                        backRefs.current[it.id] = el;
+                      }}
+                    >
                       <BackSideCard
                         data={it.data}
                         background={{
-                          style: config.bgStyle === "solid" ? "solid" : "gradient",
+                          style:
+                            config.bgStyle === "solid"
+                              ? "solid"
+                              : "gradient",
                           colors: config.bgColors,
                         }}
                         textColor={it.textColor}
@@ -377,6 +542,65 @@ export default function CheckoutPage() {
               })}
             </div>
           </>
+        )}
+
+        {/* Login modal (center, bigger) */}
+        {showLoginModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 text-base">
+              <h2 className="text-lg font-semibold mb-3">Login required</h2>
+              <p className="text-[15px] text-gray-700 mb-5 leading-relaxed">
+                Please login or sign up before making a payment. Do you want to
+                go to the login page now?
+              </p>
+              <div className="flex justify-end gap-3">
+                <button
+                  className="px-4 py-2 text-sm rounded border border-gray-300 hover:bg-gray-50"
+                  onClick={handleLoginCancel}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 text-sm rounded bg-primary text-primary-foreground hover:brightness-95"
+                  onClick={handleLoginConfirm}
+                >
+                  Go to Login
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Address confirm modal (center, bigger) */}
+        {showAddressModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 text-base">
+              <h2 className="text-lg font-semibold mb-3">
+                Confirm delivery address
+              </h2>
+              <p className="text-[15px] text-gray-700 mb-4 leading-relaxed">
+                Please confirm your delivery address before proceeding to
+                payment:
+              </p>
+              <div className="border rounded-lg bg-gray-50 p-4 text-sm mb-5">
+                {pendingAddress || "-"}
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  className="px-4 py-2 text-sm rounded border border-gray-300 hover:bg-gray-50"
+                  onClick={handleAddressCancel}
+                >
+                  Edit address
+                </button>
+                <button
+                  className="px-4 py-2 text-sm rounded bg-primary text-primary-foreground hover:brightness-95"
+                  onClick={handleAddressConfirm}
+                >
+                  Confirm &amp; Pay
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>
