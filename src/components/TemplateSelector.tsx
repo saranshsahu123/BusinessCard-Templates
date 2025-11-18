@@ -43,7 +43,7 @@ export const TemplateSelector = ({
   const backRef = useRef<HTMLDivElement>(null);
   const selectedConfig = templates.find((t) => t.id === selectedTemplate) || templates[0];
   const [page, setPage] = useState(0);
-  const pageSize = 80;
+  const pageSize = 20;
   const [sbTemplates, setSbTemplates] = useState<Template[]>([]);
   const combined = [
     // Show admin/server templates first like before
@@ -80,12 +80,30 @@ export const TemplateSelector = ({
     );
   };
 
-  const [positions, setPositions] = useState<{ name: { x: number; y: number }; title: { x: number; y: number }; company: { x: number; y: number } }>(
-    { name: { x: 70, y: 30 }, title: { x: 70, y: 42 }, company: { x: 70, y: 52 } }
+  type FrontKey = 'name' | 'title' | 'company' | 'logo';
+
+  const [positions, setPositions] = useState<{
+    name: { x: number; y: number };
+    title: { x: number; y: number };
+    company: { x: number; y: number };
+    logo: { x: number; y: number };
+  }>(
+    {
+      name: { x: 70, y: 30 },
+      title: { x: 70, y: 42 },
+      company: { x: 70, y: 52 },
+      logo: { x: 18, y: 50 },
+    }
   );
-  const [sizes, setSizes] = useState<{ name: number; title: number; company: number }>({ name: 22, title: 18, company: 14 });
-  const dragState = useRef<{ key: 'name' | 'title' | 'company' | null; offsetX: number; offsetY: number }>({ key: null, offsetX: 0, offsetY: 0 });
-  const resizeState = useRef<{ key: 'name' | 'title' | 'company' | null; baseSize: number; startY: number }>({ key: null, baseSize: 0, startY: 0 });
+  const [sizes, setSizes] = useState<{
+    name: number;
+    title: number;
+    company: number;
+    logo: number;
+  }>({ name: 22, title: 18, company: 14, logo: 64 });
+  const dragState = useRef<{ key: FrontKey | null; offsetX: number; offsetY: number }>({ key: null, offsetX: 0, offsetY: 0 });
+  const resizeState = useRef<{ key: FrontKey | null; baseSize: number; startY: number }>({ key: null, baseSize: 0, startY: 0 });
+
   const [positionsBack, setPositionsBack] = useState<{ email: { x: number; y: number }; phone: { x: number; y: number }; website: { x: number; y: number }; address: { x: number; y: number }; qr: { x: number; y: number } }>(
     { email: { x: 15, y: 20 }, phone: { x: 15, y: 32 }, website: { x: 15, y: 44 }, address: { x: 15, y: 56 }, qr: { x: 75, y: 35 } }
   );
@@ -93,7 +111,7 @@ export const TemplateSelector = ({
   const backDragState = useRef<{ key: 'email' | 'phone' | 'website' | 'address' | 'qr' | null; offsetX: number; offsetY: number }>({ key: null, offsetX: 0, offsetY: 0 });
   const backResizeState = useRef<{ key: 'email' | 'phone' | 'website' | 'address' | 'qr' | null; baseSize: number; startY: number }>({ key: null, baseSize: 0, startY: 0 });
 
-  const onDragStart = (key: 'name' | 'title' | 'company', e: React.MouseEvent | React.TouchEvent) => {
+  const onDragStart = (key: FrontKey, e: React.MouseEvent | React.TouchEvent) => {
     if (!isEditLayout || !previewRef.current) return;
     const rect = previewRef.current.getBoundingClientRect();
     const pointX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
@@ -127,7 +145,7 @@ export const TemplateSelector = ({
     window.removeEventListener('touchend', onDragEnd);
   };
 
-  const onResizeStart = (key: 'name' | 'title' | 'company', e: React.MouseEvent | React.TouchEvent) => {
+  const onResizeStart = (key: FrontKey, e: React.MouseEvent | React.TouchEvent) => {
     if (!isEditLayout) return;
     const startY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
     const baseSize = sizes[key];

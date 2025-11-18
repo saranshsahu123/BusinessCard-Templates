@@ -81,6 +81,7 @@ export const router = createBrowserRouter(
                 { path: "templates/new", element: <NewTemplate /> },
                 { path: "templates/:id/edit", element: <EditTemplate /> },
                 { path: "payments", element: <PaymentsPage /> },
+                { path: "contact", element: <ContactMessages /> },
               ],
             },
           ],
