@@ -178,6 +178,19 @@ router.post('/verify', authRequired, async (req, res) => {
   }
 });
 
+// User: list own payments (orders)
+router.get('/my', authRequired, async (req, res) => {
+  try {
+    const payments = await Payment.find({ user: req.user._id })
+      .sort({ createdAt: -1 })
+      .lean();
+    res.json({ payments });
+  } catch (e) {
+    console.error('Error fetching user payments', e);
+    res.status(500).json({ error: 'Failed to load your payments' });
+  }
+});
+
 // Admin: list all payments
 router.get('/admin-list', authRequired, adminRequired, async (req, res) => {
   try {

@@ -17,6 +17,7 @@ import Contact from "./pages/Contact";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import PaymentsPage from "@/pages/admin/PaymentsPage";
+import MyOrders from "./pages/MyOrders";
 
 
 export const router = createBrowserRouter(
@@ -64,6 +65,10 @@ export const router = createBrowserRouter(
     {
       element: <RequireAuth />,
       children: [
+        {
+          path: "/my-orders",
+          element: <MyOrders />,
+        },
         {
           element: <RequireAdmin />,
           children: [

@@ -165,7 +165,7 @@ export default function CheckoutPage() {
                 if (b) await downloadAsImage(b, `${fid}-back`);
               }
               clear();
-              navigate("/");
+              navigate("/my-orders");
             } else {
               alert("Payment verification failed");
             }

@@ -85,11 +85,25 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Link to="/cart" className="rounded-full px-4 py-2 text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md">Cart</Link>
+              <Link
+                to="/cart"
+                className="rounded-full px-4 py-2 text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md"
+              >
+                Cart
+              </Link>
               {user ? (
                 <>
+                  <Link
+                    to="/my-orders"
+                    className="rounded-full px-4 py-2 text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md"
+                  >
+                    My Orders
+                  </Link>
                   {profile?.role === "admin" && (
-                    <Link to="/admin/templates" className="rounded-full px-4 py-2 text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md">
+                    <Link
+                      to="/admin/templates"
+                      className="rounded-full px-4 py-2 text-sm bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md"
+                    >
                       Admin
                     </Link>
                   )}
@@ -105,7 +119,10 @@ const Index = () => {
                 </>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Link to="/login" className="rounded-full px-4 py-2 text-sm w-full text-center bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md">
+                  <Link
+                    to="/login"
+                    className="rounded-full px-4 py-2 text-sm w-full text-center bg-white/10 hover:bg-white/20 border border-white/20 shadow-sm transition-all hover:shadow-md"
+                  >
                     Login
                   </Link>
                 </div>
