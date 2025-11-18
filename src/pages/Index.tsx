@@ -197,7 +197,7 @@ const Index = () => {
               <h4 className="text-white font-semibold text-xs tracking-wider uppercase mb-3">About</h4>
               <ul className="space-y-2">
                 <li><a className="hover:text-white" href="#about">About Us</a></li>
-                <li><Link className="hover:text-white" to="/contact">Contact Us</Link></li>
+                <li><a className="hover:text-white" href="#contact">Contact Us</a></li>
               </ul>
             </div>
 

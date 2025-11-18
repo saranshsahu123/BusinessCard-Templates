@@ -12,6 +12,7 @@ const AdminLayout = () => {
         <nav className="mt-6 space-y-2">
           <Link to="/admin/templates" className="block px-3 py-2 rounded hover:bg-muted font-medium">Templates</Link>
           <Link to="/admin/payments" className="block px-3 py-2 rounded hover:bg-muted font-medium">Payments</Link>
+          <Link to="/admin/contact" className="block px-3 py-2 rounded hover:bg-muted font-medium">Contact</Link>
         </nav>
         <div className="mt-auto pt-4 border-t flex items-center justify-between">
           <span className="text-sm text-muted-foreground">{profile?.role}</span>
