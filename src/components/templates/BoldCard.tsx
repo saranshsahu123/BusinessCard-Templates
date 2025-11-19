@@ -20,6 +20,8 @@ TEL:${data.phone}
 URL:${data.website}
 ADR:${data.address}
 END:VCARD`;
+  const hasUserCoreInfo = !!(data.name && data.email && data.phone);
+  const hasUserName = !!data.name?.trim();
 
   return (
     <div
@@ -28,14 +30,22 @@ END:VCARD`;
     >
       <div className="h-1/3 bg-gradient-to-r from-primary to-accent p-6 flex items-center">
         <div>
-          <h3 className="text-2xl font-bold text-white mb-1">{data.name || "Your Name"}</h3>
-          <p className="text-sm text-white/90">{data.title || "Job Title"}</p>
+          <h3 className="text-2l font-bold text-white mb-1">
+            {hasUserName ? (data.name || "") : (data.name || "Your Name")}
+          </h3>
+          {data.title?.trim() && (
+            <p className="text-sm text-white/90">{data.title}</p>
+          )}
         </div>
       </div>
 
       <div className="h-2/3 p-6 flex flex-col justify-between">
         <div>
-          <p className="text-lg font-semibold mb-4" style={{ color: accentColor }}>{data.company || "Company Name"}</p>
+          {data.company?.trim() && (
+            <p className="text-lg font-semibold mb-4" style={{ color: accentColor }}>
+              {data.company}
+            </p>
+          )}
           <div className="space-y-1.5 text-sm" style={{ color: textColor }}>
             {data.email && <div className="font-medium">{data.email}</div>}
             {data.phone && <div>{data.phone}</div>}

@@ -22,6 +22,8 @@ export const ClassicCard: React.FC<ClassicCardProps> = ({
 }) => {
   const appliedText = textColor ?? config.textColor;
   const appliedAccent = accentColor ?? config.accentColor;
+  const hasUserCoreInfo = !!(data.name && data.email && data.phone);
+  const hasUserName = !!data.name?.trim();
 
   const vCardData = `BEGIN:VCARD\nVERSION:3.0\nFN:${data.name}\nTITLE:${data.title}\nORG:${data.company}\nEMAIL:${data.email}\nTEL:${data.phone}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`;
   // Background helper
@@ -58,11 +60,19 @@ export const ClassicCard: React.FC<ClassicCardProps> = ({
       )}
       <div className="relative z-10 flex flex-col justify-between h-full">
         <div>
-          <h3 className="font-semibold" style={{ fontSize: (fontSize || 15) + 6 }}>{data.name || "Your Name"}</h3>
-          <p className="mt-1" style={{ color: appliedAccent, fontSize: (fontSize || 15) + 2 }}>
-            {data.title || "Job Title"}
-          </p>
-          <p className="mt-1 opacity-80" style={{ fontSize: Math.max(12, (fontSize || 15)) }}>{data.company || "Company Name"}</p>
+          <h3 className="font-semibold" style={{ fontSize: (fontSize || 15) + 6 }}>
+            {hasUserName ? (data.name || "") : (data.name || "Your Name")}
+          </h3>
+          {data.title?.trim() && (
+            <p className="mt-1" style={{ color: appliedAccent, fontSize: (fontSize || 15) + 2 }}>
+              {data.title}
+            </p>
+          )}
+          {data.company?.trim() && (
+            <p className="mt-1 opacity-80" style={{ fontSize: Math.max(12, (fontSize || 15)) }}>
+              {data.company}
+            </p>
+          )}
         </div>
         {data.name && data.email && (
           <div className="bg-white p-2 rounded-lg shadow-md self-end">

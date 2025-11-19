@@ -35,7 +35,7 @@ export const BusinessCardForm = ({ data, onChange }: BusinessCardFormProps) => {
   };
 
   return (
-    <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in">
+    <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in w-full max-w-md mx-auto lg:max-w-none">
       <h2 className="text-2xl font-bold mb-6 text-foreground">Your Details</h2>
       <div className="space-y-4">
         <div className="group">
@@ -49,7 +49,7 @@ export const BusinessCardForm = ({ data, onChange }: BusinessCardFormProps) => {
           />
         </div>
         <div className="group">
-          <Label htmlFor="title">Job Title *</Label>
+          <Label htmlFor="title">Job Title </Label>
           <Input
             id="title"
             value={data.title}
@@ -59,7 +59,7 @@ export const BusinessCardForm = ({ data, onChange }: BusinessCardFormProps) => {
           />
         </div>
         <div className="group">
-          <Label htmlFor="company">Company Name *</Label>
+          <Label htmlFor="company">Company Name</Label>
           <Input
             id="company"
             value={data.company}
@@ -80,7 +80,7 @@ export const BusinessCardForm = ({ data, onChange }: BusinessCardFormProps) => {
           />
         </div>
         <div className="group">
-          <Label htmlFor="phone">Phone Number</Label>
+          <Label htmlFor="phone">Phone Number *</Label>
           <Input
             id="phone"
             value={data.phone}

@@ -160,3 +160,13 @@ html.anti-capture-blur body {
   max-width: 90%;
   text-align: center;
 }
+
+/* Utility to hide scrollbars but keep scrolling behavior */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}

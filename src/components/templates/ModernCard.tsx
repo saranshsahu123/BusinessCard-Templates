@@ -21,6 +21,8 @@ TEL:${data.phone}
 URL:${data.website}
 ADR:${data.address}
 END:VCARD`;
+  const hasUserCoreInfo = !!(data.name && data.email && data.phone);
+  const hasUserName = !!data.name?.trim();
 
   return (
     <div
@@ -31,10 +33,20 @@ END:VCARD`;
 
       <div className="relative z-10">
         <div className="inline-block bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1 mb-4">
-          <p className="text-xs font-medium" style={{ color: textColor }}>{data.company || "Company Name"}</p>
+          {data.company?.trim() && (
+            <p className="text-xs font-medium" style={{ color: textColor }}>
+              {data.company}
+            </p>
+          )}
         </div>
-        <h3 className="text-2xl font-bold mb-1" style={{ color: textColor }}>{data.name || "Your Name"}</h3>
-        <p className="text-sm opacity-90" style={{ color: textColor }}>{data.title || "Job Title"}</p>
+        <h3 className="text-2xl font-bold mb-1" style={{ color: textColor }}>
+          {hasUserName ? (data.name || "") : (data.name || "Your Name")}
+        </h3>
+        {data.title?.trim() && (
+          <p className="text-sm opacity-90" style={{ color: textColor }}>
+            {data.title}
+          </p>
+        )}
       </div>
 
       <div className="flex justify-between items-end relative z-10">

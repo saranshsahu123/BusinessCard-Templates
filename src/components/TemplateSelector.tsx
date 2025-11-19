@@ -12,6 +12,8 @@ import { useNavigate } from "react-router-dom";
 import { listPublishedTemplates, Template } from "@/services/templates";
 import { apiFetch } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
+import { CustomizationPanel } from "./CustomizationPanel";
 
 declare global {
   interface Window {
@@ -19,13 +21,16 @@ declare global {
   }
 }
 
-
 interface TemplateSelectorProps {
   data: BusinessCardData;
   selectedFont?: string;
   fontSize?: number;
   textColor?: string;
   accentColor?: string;
+  onFontSelect?: (font: string) => void;
+  onFontSizeChange?: (size: number) => void;
+  onTextColorChange?: (color: string) => void;
+  onAccentColorChange?: (color: string) => void;
 }
 
 const templates = classicTemplates;
@@ -35,7 +40,11 @@ export const TemplateSelector = ({
   selectedFont = "Arial, sans-serif",
   fontSize = 16,
   textColor = "#000000",
-  accentColor = "#0ea5e9"
+  accentColor = "#0ea5e9",
+  onFontSelect,
+  onFontSizeChange,
+  onTextColorChange,
+  onAccentColorChange,
 }: TemplateSelectorProps) => {
   const [selectedTemplate, setSelectedTemplate] = useState(templates[0]?.id ?? "classic-001");
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -57,6 +66,8 @@ export const TemplateSelector = ({
   const pricePerItem = 2.99;
   const { user } = useAuth();          // ⬅️ yeh line add karo
   const [isEditLayout, setIsEditLayout] = useState(false);
+  const [isLayoutDialogOpen, setIsLayoutDialogOpen] = useState(false);
+  const [isStyleDialogOpen, setIsStyleDialogOpen] = useState(false);
 
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -604,6 +615,7 @@ export const TemplateSelector = ({
                 const fs = hasOverrides ? fontSize : (cfg.fontSize || 16);
                 const accent = hasOverrides ? accentColor : (cfg.accentColor || "#0ea5e9");
                 const ff = hasOverrides ? selectedFont : (cfg.fontFamily || "Inter, Arial, sans-serif");
+                const hasUserName = !!data.name?.trim();
                 return (
                   <>
                     <div ref={previewRef} className="w-full max-w-full relative overflow-hidden">
@@ -628,9 +640,15 @@ export const TemplateSelector = ({
                               </div>
                             ) : <div />}
                             <div className="flex flex-col text-right leading-snug">
-                              <h3 className="font-bold" style={{ fontFamily: ff, fontSize: fs + 6 }}>{data.name || "Your Name"}</h3>
-                              <p style={{ color: accent, fontSize: fs + 2 }}>{data.title || "Job Title"}</p>
-                              <p className="opacity-80" style={{ fontSize: Math.max(12, fs) }}>{data.company || "Company"}</p>
+                              <h3 className="font-bold" style={{ fontFamily: ff, fontSize: fs + 6 }}>
+                                {hasUserName ? (data.name || "") : (data.name || "Your Name")}
+                              </h3>
+                              {data.title?.trim() && (
+                                <p style={{ color: accent, fontSize: fs + 2 }}>{data.title}</p>
+                              )}
+                              {data.company?.trim() && (
+                                <p className="opacity-80" style={{ fontSize: Math.max(12, fs) }}>{data.company}</p>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -692,6 +710,45 @@ export const TemplateSelector = ({
                                 onTouchStart={(e) => { e.stopPropagation(); onResizeStart('company', e); }}
                               />
                             </div>
+
+                                {/* YAHAN LOGO BLOCK DAALNA HAI */}
+                                      {data.logo && (
+        <div
+          className="cursor-move select-none"
+          style={{
+            position: "absolute",
+            left: `${positions.logo.x}%`,
+            top: `${positions.logo.y}%`,
+            width: sizes.logo,
+            height: sizes.logo,
+            borderRadius: "9999px",
+            overflow: "hidden",
+            backgroundColor: "rgba(255,255,255,0.9)",
+          }}
+          onMouseDown={(e) => onDragStart("logo", e)}
+          onTouchStart={(e) => onDragStart("logo", e)}
+        >
+          <img
+            src={data.logo}
+            alt="logo"
+            className="w-full h-full object-cover"
+            crossOrigin="anonymous"
+          />
+          <span
+            className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
+            style={{ right: -6, bottom: -6 }}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              onResizeStart("logo", e);
+            }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              onResizeStart("logo", e);
+            }}
+          />
+        </div>
+      )}
+
                           </div>
                         </div>
                       )}
@@ -819,6 +876,18 @@ export const TemplateSelector = ({
             </div>
           </div>
         </div>
+        <div className="mt-4">
+          <CustomizationPanel
+            selectedFont={selectedFont}
+            onFontSelect={onFontSelect ?? (() => {})}
+            fontSize={fontSize}
+            onFontSizeChange={onFontSizeChange ?? (() => {})}
+            textColor={textColor}
+            onTextColorChange={onTextColorChange ?? (() => {})}
+            accentColor={accentColor}
+            onAccentColorChange={onAccentColorChange ?? (() => {})}
+          />
+        </div>
       </div>
 
       <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.4s] opacity-0 [animation-fill-mode:forwards]">
@@ -826,7 +895,7 @@ export const TemplateSelector = ({
         {combined.length === 0 ? (
           <div className="text-sm text-muted-foreground">No classic templates available.</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-4">
             {pagedTemplates.map((item) => (
               <div key={item.id} className="relative">
                 <button

@@ -2,7 +2,6 @@ import { useState, useRef } from "react";
 import { Hero } from "@/components/Hero";
 import { BusinessCardForm, BusinessCardData } from "@/components/BusinessCardForm";
 import { TemplateSelector } from "@/components/TemplateSelector";
-import { CustomizationPanel } from "@/components/CustomizationPanel";
 import { PaymentBanner } from "@/components/PaymentBanner";
 import { PaymentFeatures } from "@/components/PaymentFeatures";
 import { Button } from "@/components/ui/button";
@@ -136,27 +135,8 @@ const Index = () => {
       <PaymentBanner />
 
       <main className="container mx-auto max-w-7xl px-4 py-12">
-        {/* Form + Customization */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
-          <div>
-            <BusinessCardForm data={businessData} onChange={setBusinessData} />
-          </div>
-
-          <div className="space-y-6">
-            {/* Customization Panel */}
-            <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.2s] opacity-0 [animation-fill-mode:forwards]">
-              <CustomizationPanel
-                selectedFont={selectedFont}
-                onFontSelect={setSelectedFont}
-                fontSize={fontSize}
-                onFontSizeChange={setFontSize}
-                textColor={textColor}
-                onTextColorChange={setTextColor}
-                accentColor={accentColor}
-                onAccentColorChange={setAccentColor}
-              />
-            </div>
-          </div>
+        <div className="mb-12">
+          <BusinessCardForm data={businessData} onChange={setBusinessData} />
         </div>
 
         {/* Classic Templates Only */}
@@ -168,6 +148,10 @@ const Index = () => {
               fontSize={fontSize}
               textColor={textColor}
               accentColor={accentColor}
+              onFontSelect={setSelectedFont}
+              onFontSizeChange={setFontSize}
+              onTextColorChange={setTextColor}
+              onAccentColorChange={setAccentColor}
             />
           </div>
         </div>

@@ -59,6 +59,7 @@ export const BackSideCard: React.FC<Props> = ({
   qrLogoUrl,
 }) => {
   const appliedAccent = accentColor ?? config?.accentColor ?? "#1f2937";
+  const hasUserCoreInfo = !!(data.name && data.email && data.phone);
 
   const bgStyle: React.CSSProperties = useMemo(() => {
     if (transparentBg) return {};
@@ -94,9 +95,31 @@ export const BackSideCard: React.FC<Props> = ({
       {compact ? (
         <div className="w-full flex items-center justify-center gap-4 px-2" style={{ lineHeight: 1.2 }}>
           <div className="text-sm space-y-1 text-center">
-            <div><strong style={{ color: appliedAccent }}>✉</strong> {data.email || "email@example.com"}</div>
-            <div><strong style={{ color: appliedAccent }}>✆</strong> {data.phone || "+91 00000 00000"}</div>
-            <div><strong style={{ color: appliedAccent }}>⌂</strong> {data.website || "your-website.com"}</div>
+            {hasUserCoreInfo ? (
+              <>
+                {data.email && (
+                  <div>
+                    <strong style={{ color: appliedAccent }}>✉</strong> {data.email}
+                  </div>
+                )}
+                {data.phone && (
+                  <div>
+                    <strong style={{ color: appliedAccent }}>✆</strong> {data.phone}
+                  </div>
+                )}
+                {data.website && (
+                  <div>
+                    <strong style={{ color: appliedAccent }}>⌂</strong> {data.website}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div><strong style={{ color: appliedAccent }}>✉</strong> {data.email || "email@example.com"}</div>
+                <div><strong style={{ color: appliedAccent }}>✆</strong> {data.phone || "+91 00000 00000"}</div>
+                <div><strong style={{ color: appliedAccent }}>⌂</strong> {data.website || "your-website.com"}</div>
+              </>
+            )}
           </div>
           {(data.name || data.email) && (
             <div className="bg-white/90 p-1.5 rounded-lg shadow-sm">
@@ -112,10 +135,37 @@ export const BackSideCard: React.FC<Props> = ({
       ) : (
         <div className="flex flex-col items-center justify-center w-full space-y-3">
           <div className="text-center space-y-1">
-            <div><strong style={{ color: appliedAccent }}>✉</strong> {data.email || "email@example.com"}</div>
-            <div><strong style={{ color: appliedAccent }}>✆</strong> {data.phone || "+91 00000 00000"}</div>
-            <div><strong style={{ color: appliedAccent }}>⌂</strong> {data.website || "your-website.com"}</div>
-            <div><strong style={{ color: appliedAccent }}>📍</strong> {data.address || "Your Address, City"}</div>
+            {hasUserCoreInfo ? (
+              <>
+                {data.email && (
+                  <div>
+                    <strong style={{ color: appliedAccent }}>✉</strong> {data.email}
+                  </div>
+                )}
+                {data.phone && (
+                  <div>
+                    <strong style={{ color: appliedAccent }}>✆</strong> {data.phone}
+                  </div>
+                )}
+                {data.website && (
+                  <div>
+                    <strong style={{ color: appliedAccent }}>⌂</strong> {data.website}
+                  </div>
+                )}
+                {data.address && (
+                  <div>
+                    <strong style={{ color: appliedAccent }}>📍</strong> {data.address}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div><strong style={{ color: appliedAccent }}>✉</strong> {data.email || "email@example.com"}</div>
+                <div><strong style={{ color: appliedAccent }}>✆</strong> {data.phone || "+91 00000 00000"}</div>
+                <div><strong style={{ color: appliedAccent }}>⌂</strong> {data.website || "your-website.com"}</div>
+                <div><strong style={{ color: appliedAccent }}>📍</strong> {data.address || "Your Address, City"}</div>
+              </>
+            )}
           </div>
           {(data.name || data.email) && (
             <div className="bg-white/90 p-2 rounded-xl shadow-sm backdrop-blur-sm">
