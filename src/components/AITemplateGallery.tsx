@@ -54,6 +54,7 @@ const TemplateCard = ({
             textColor={front?.textColor}
             accentColor={front?.accentColor}
             fontFamily={front?.fontFamily}
+            qrColor={front?.textColor || "#000000"}
           />
         ) : (
           <DynamicCard data={data} designConfig={front} />

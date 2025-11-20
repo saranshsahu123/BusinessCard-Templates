@@ -14,6 +14,10 @@ interface CustomizationPanelProps {
   onTextColorChange: (color: string) => void;
   accentColor: string;
   onAccentColorChange: (color: string) => void;
+  qrStyle?: "classic" | "soft" | "contrast" | "outline" | "pill";
+  onQrStyleChange?: (style: "classic" | "soft" | "contrast" | "outline" | "pill") => void;
+  qrColor: string;
+  onQrColorChange: (color: string) => void;
 }
 
 const colorPresets = [
@@ -75,9 +79,13 @@ export const CustomizationPanel = ({
   textColor,
   onTextColorChange,
   accentColor,
-  onAccentColorChange
+  onAccentColorChange,
+  qrStyle = "classic",
+  onQrStyleChange,
+  qrColor,
+  onQrColorChange,
 }: CustomizationPanelProps) => {
-  const [activeTab, setActiveTab] = useState<"font" | "size" | "text" | "accent">("font");
+  const [activeTab, setActiveTab] = useState<"font" | "size" | "text" | "accent" | "qr">("font");
 
   const tabBase = "flex-1 px-3 py-1 text-xs font-medium rounded-full transition-colors cursor-pointer text-center";
 
@@ -132,6 +140,18 @@ export const CustomizationPanel = ({
           }
         >
           Accent Color
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("qr")}
+          className={
+            tabBase +
+            (activeTab === "qr"
+              ? " bg-primary text-primary-foreground shadow-sm"
+              : " text-foreground/70 hover:bg-muted")
+          }
+        >
+          QR
         </button>
       </div>
 
@@ -245,6 +265,27 @@ export const CustomizationPanel = ({
               />
               <span className="text-xs text-muted-foreground font-mono">{accentColor}</span>
             </div>
+          </div>
+        )}
+
+        {activeTab === "qr" && (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <Label className="text-xs font-medium whitespace-nowrap">QR Color</Label>
+              <span
+                className="inline-block w-5 h-5 rounded border border-gray-300"
+                style={{ backgroundColor: qrColor }}
+              />
+
+              <input
+                type="color"
+                value={qrColor}
+                onChange={(e) => onQrColorChange(e.target.value)}
+                className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
+              />
+              <span className="text-[10px] text-muted-foreground font-mono">{qrColor}</span>
+            </div>
+
           </div>
         )}
       </div>
