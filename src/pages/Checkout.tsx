@@ -535,6 +535,7 @@ export default function CheckoutPage() {
                         accentColor={it.accentColor}
                         fontFamily={it.selectedFont}
                         fontSize={it.fontSize}
+                        qrColor={it.textColor || "#000000"}
                       />
                     </div>
                   </div>

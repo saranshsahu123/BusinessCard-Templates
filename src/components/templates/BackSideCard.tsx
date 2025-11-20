@@ -26,6 +26,7 @@ interface Props {
   // New Props
   qrColor?: string;
   qrLogoUrl?: string;
+  qrStyle?: "classic" | "soft" | "contrast" | "outline" | "pill";
 }
 
 // Helper: Move outside component
@@ -57,15 +58,16 @@ export const BackSideCard: React.FC<Props> = ({
   qrSize,
   qrColor = "#000000",
   qrLogoUrl,
+  qrStyle = "classic",
 }) => {
   const appliedAccent = accentColor ?? config?.accentColor ?? "#1f2937";
-  const hasUserCoreInfo = !!(data.name && data.email && data.phone);
+  const hasAnyContact = !!(data.email || data.phone || data.website || data.address);
 
   const bgStyle: React.CSSProperties = useMemo(() => {
     if (transparentBg) return {};
     const style = config?.bgStyle ?? background?.style ?? "solid";
     const colors = config?.bgColors ?? background?.colors ?? ["#ffffff"];
-    
+
     if (style === "gradient" && colors.length >= 2) {
       return { background: `linear-gradient(135deg, ${colors[0]}, ${colors[1]})` };
     }
@@ -76,6 +78,19 @@ export const BackSideCard: React.FC<Props> = ({
   const appliedText = textColor ?? config?.textColor ?? getContrast(baseBgColor);
 
   const vCardData = `BEGIN:VCARD\nVERSION:3.0\nFN:${data.name}\nTITLE:${data.title}\nORG:${data.company}\nEMAIL:${data.email}\nTEL:${data.phone}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`;
+  const qrValue = (data.website && data.website.trim().length > 0) ? data.website.trim() : vCardData;
+
+  const qrWrapperBase = "bg-white/90 shadow-sm";
+  const qrWrapperClass =
+    qrStyle === "soft"
+      ? "bg-white/90 shadow-md rounded-2xl border border-white/70"
+      : qrStyle === "contrast"
+        ? "bg-slate-900 shadow-lg rounded-xl border-2 border-white"
+        : qrStyle === "outline"
+          ? "bg-transparent shadow-none rounded-xl border-2 border-white/90"
+          : qrStyle === "pill"
+            ? "bg-white/90 shadow-sm rounded-full border border-white/80 px-4"
+            : "bg-white/90 shadow-sm rounded-xl";
 
   // Dynamic Image Settings for QR
   const qrImageSettings = useMemo(() => {
@@ -95,7 +110,7 @@ export const BackSideCard: React.FC<Props> = ({
       {compact ? (
         <div className="w-full flex items-center justify-center gap-4 px-2" style={{ lineHeight: 1.2 }}>
           <div className="text-sm space-y-1 text-center">
-            {hasUserCoreInfo ? (
+            {hasAnyContact ? (
               <>
                 {data.email && (
                   <div>
@@ -115,17 +130,18 @@ export const BackSideCard: React.FC<Props> = ({
               </>
             ) : (
               <>
-                <div><strong style={{ color: appliedAccent }}>✉</strong> {data.email || "email@example.com"}</div>
-                <div><strong style={{ color: appliedAccent }}>✆</strong> {data.phone || "+91 00000 00000"}</div>
-                <div><strong style={{ color: appliedAccent }}>⌂</strong> {data.website || "your-website.com"}</div>
+                <div><strong style={{ color: appliedAccent }}>✉</strong> email@example.com</div>
+                <div><strong style={{ color: appliedAccent }}>✆</strong> +91 00000 00000</div>
+                <div><strong style={{ color: appliedAccent }}>⌂</strong> your-website.com</div>
               </>
             )}
           </div>
+
           {(data.name || data.email) && (
-            <div className="bg-white/90 p-1.5 rounded-lg shadow-sm">
-              <QRCodeSVG 
-                value={vCardData} 
-                size={qrSize ?? (showLargeQR ? 80 : 60)} 
+            <div className={`${qrWrapperClass} p-1.5 backdrop-blur-sm`}>
+              <QRCodeSVG
+                value={qrValue}
+                size={qrSize ?? (showLargeQR ? 80 : 60)}
                 fgColor={qrColor}
                 imageSettings={qrImageSettings}
               />
@@ -135,7 +151,7 @@ export const BackSideCard: React.FC<Props> = ({
       ) : (
         <div className="flex flex-col items-center justify-center w-full space-y-3">
           <div className="text-center space-y-1">
-            {hasUserCoreInfo ? (
+            {hasAnyContact ? (
               <>
                 {data.email && (
                   <div>
@@ -160,18 +176,19 @@ export const BackSideCard: React.FC<Props> = ({
               </>
             ) : (
               <>
-                <div><strong style={{ color: appliedAccent }}>✉</strong> {data.email || "email@example.com"}</div>
-                <div><strong style={{ color: appliedAccent }}>✆</strong> {data.phone || "+91 00000 00000"}</div>
-                <div><strong style={{ color: appliedAccent }}>⌂</strong> {data.website || "your-website.com"}</div>
-                <div><strong style={{ color: appliedAccent }}>📍</strong> {data.address || "Your Address, City"}</div>
+                <div><strong style={{ color: appliedAccent }}>✉</strong> email@example.com</div>
+                <div><strong style={{ color: appliedAccent }}>✆</strong> +91 00000 00000</div>
+                <div><strong style={{ color: appliedAccent }}>⌂</strong> your-website.com</div>
+                <div><strong style={{ color: appliedAccent }}>📍</strong> Your Address, City</div>
               </>
             )}
           </div>
+
           {(data.name || data.email) && (
-            <div className="bg-white/90 p-2 rounded-xl shadow-sm backdrop-blur-sm">
-              <QRCodeSVG 
-                value={vCardData} 
-                size={qrSize ?? (showLargeQR ? 100 : 64)} 
+            <div className={`${qrWrapperClass} p-2 backdrop-blur-sm`}>
+              <QRCodeSVG
+                value={vCardData}
+                size={qrSize ?? (showLargeQR ? 100 : 64)}
                 fgColor={qrColor}
                 imageSettings={qrImageSettings}
               />
