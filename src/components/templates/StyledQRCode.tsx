@@ -12,6 +12,8 @@ interface StyledQRCodeProps {
   style?: QRVisualStyle;
 }
 
+
+
 export const StyledQRCode: React.FC<StyledQRCodeProps> = ({
   value,
   size,
