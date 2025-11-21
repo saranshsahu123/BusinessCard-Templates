@@ -56,12 +56,12 @@ export const TemplateSelector = ({
   const pageSize = 20;
   const [sbTemplates, setSbTemplates] = useState<Template[]>([]);
   const sid = selectedTemplate.startsWith("sb:") ? selectedTemplate.slice(3) : null;
-const selectedConfig = sbTemplates.find(x => x.id === sid)?.config || {};
+  const selectedConfig = sbTemplates.find(x => x.id === sid)?.config || {};
   const combined = sbTemplates.map((t) => ({
-  kind: "server",
-  id: `sb:${t.id}`,
-  server: t,
-}));
+    kind: "server",
+    id: `sb:${t.id}`,
+    server: t,
+  }));
 
   const totalPages = Math.max(1, Math.ceil(combined.length / pageSize));
   const pagedTemplates = combined.slice(page * pageSize, page * pageSize + pageSize);
@@ -444,7 +444,7 @@ const selectedConfig = sbTemplates.find(x => x.id === sid)?.config || {};
 
         </div>
         <div className="w-full py-6 flex items-center justify-center">
-  <div className="flex items-center justify-center gap-10 w-full">
+          <div className="flex items-center justify-center gap-10 w-full">
 
             <div className="z gap-6 w-full h-full">
 
@@ -456,7 +456,7 @@ const selectedConfig = sbTemplates.find(x => x.id === sid)?.config || {};
                       <div ref={previewRef} className="relative w-full h-full max-w-full overflow-hidden flex items-center justify-center">
 
                         <div className="wm-screen-only" data-watermark="screen-only" />
-                        
+
                         {isEditLayout && selectedConfig && (
                           <div
                             className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4 relative"
@@ -515,27 +515,27 @@ const selectedConfig = sbTemplates.find(x => x.id === sid)?.config || {};
                           </div>
                         )}
                       </div>
-                      <div ref={backRef} className="relative w-full max-w-full overflow-hidden">
+                      <div ref={backRef} className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden relative">
                         <div className="wm-screen-only" data-watermark="screen-only" />
                         {!isEditLayout && selectedConfig && (
                           <BackSideCard
-  data={data}
-  background={{
-  style: selectedConfig.bgStyle || "solid",
-  colors: selectedConfig.bgColors || ["#ffffff"],
-}}
+                            data={data}
+                            background={{
+                              style: selectedConfig.bgStyle || "solid",
+                              colors: selectedConfig.bgColors || ["#ffffff"],
+                            }}
 
-  textColor={hasOverrides ? textColor : selectedConfig.textColor}
-  accentColor={hasOverrides ? accentColor : selectedConfig.accentColor}
-  fontFamily={hasOverrides ? selectedFont : undefined}
-  fontSize={hasOverrides ? fontSize : undefined}
+                            textColor={hasOverrides ? textColor : selectedConfig.textColor}
+                            accentColor={hasOverrides ? accentColor : selectedConfig.accentColor}
+                            fontFamily={hasOverrides ? selectedFont : undefined}
+                            fontSize={hasOverrides ? fontSize : undefined}
 
-  /* FIXED ADDED PROPS */
-  qrStyle={qrStyle}
-  qrColor={qrColor}
-  qrLogoUrl={data.logo ?? undefined}
-  qrSize={backSizes.qr}   // ⭐ connect resize handle
-/>
+                            /* FIXED ADDED PROPS */
+                            qrStyle={qrStyle}
+                            qrColor={qrColor}
+                            qrLogoUrl={data.logo ?? undefined}
+                            qrSize={backSizes.qr}   // ⭐ connect resize handle
+                          />
                         )}
                         {isEditLayout && selectedConfig && (
                           <div
@@ -613,10 +613,10 @@ const selectedConfig = sbTemplates.find(x => x.id === sid)?.config || {};
                               >
                                 <div className={`${qrWrapperClass} inline-block p-1.5 backdrop-blur-sm`}>
                                   <QRCodeSVG
-    value={qrValue}
-    size={backSizes.qr}     // resizing works
-    fgColor={qrColor}       // color updates
-/>
+                                    value={qrValue}
+                                    size={backSizes.qr}     // resizing works
+                                    fgColor={qrColor}       // color updates
+                                  />
 
                                 </div>
                                 <span
@@ -923,13 +923,13 @@ const selectedConfig = sbTemplates.find(x => x.id === sid)?.config || {};
         <div className="mt-4">
           <CustomizationPanel
             selectedFont={selectedFont}
-            onFontSelect={onFontSelect ?? (() => {})}
+            onFontSelect={onFontSelect ?? (() => { })}
             fontSize={fontSize}
-            onFontSizeChange={onFontSizeChange ?? (() => {})}
+            onFontSizeChange={onFontSizeChange ?? (() => { })}
             textColor={textColor}
-            onTextColorChange={onTextColorChange ?? (() => {})}
+            onTextColorChange={onTextColorChange ?? (() => { })}
             accentColor={accentColor}
-            onAccentColorChange={onAccentColorChange ?? (() => {})}
+            onAccentColorChange={onAccentColorChange ?? (() => { })}
             qrStyle={qrStyle}
             onQrStyleChange={setQrStyle}
             qrColor={qrColor}
@@ -946,73 +946,72 @@ const selectedConfig = sbTemplates.find(x => x.id === sid)?.config || {};
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
             {pagedTemplates.map((item) => {
-  const t = item.server;
-  const bg = t?.thumbnail_url || t?.background_url || undefined;
-  const cfg: any = t?.config || {};
-  const fc = cfg.fontColor || "#000000";
-  const fs = cfg.fontSize || 16;
-  const accent = cfg.accentColor || "#0ea5e9";
-  const ff = cfg.fontFamily || "Inter, Arial, sans-serif";
+              const t = item.server;
+              const bg = t?.thumbnail_url || t?.background_url || undefined;
+              const cfg: any = t?.config || {};
+              const fc = cfg.fontColor || "#000000";
+              const fs = cfg.fontSize || 16;
+              const accent = cfg.accentColor || "#0ea5e9";
+              const ff = cfg.fontFamily || "Inter, Arial, sans-serif";
 
-  return (
-    <div key={item.id} className="relative">
-      <button
-        onClick={() => setSelectedTemplate(item.id)}
-        className={`group relative rounded-lg overflow-hidden border-2 transition-all ${
-          selectedTemplate === item.id
-            ? "border-primary shadow-lg"
-            : "border-border hover:border-primary/50 hover:shadow"
-        }`}
-      >
-        {selectedTemplate === item.id && (
-          <div className="absolute top-2 right-2 bg-primary text-white rounded-full p-1">
-            <Check className="w-4 h-4" />
-          </div>
-        )}
+              return (
+                <div key={item.id} className="relative">
+                  <button
+                    onClick={() => setSelectedTemplate(item.id)}
+                    className={`group relative rounded-lg overflow-hidden border-2 transition-all ${selectedTemplate === item.id
+                        ? "border-primary shadow-lg"
+                        : "border-border hover:border-primary/50 hover:shadow"
+                      }`}
+                  >
+                    {selectedTemplate === item.id && (
+                      <div className="absolute top-2 right-2 bg-primary text-white rounded-full p-1">
+                        <Check className="w-4 h-4" />
+                      </div>
+                    )}
 
-        <div
-          className="aspect-[1.75/1] w-full"
-          style={{
-            backgroundColor: bg ? undefined : "#f3f4f6",
-            backgroundImage: bg ? `url(${bg})` : undefined,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            color: fc,
-            fontFamily: ff,
-          }}
-        >
-          <div className="w-full h-full px-4 py-3 flex items-center justify-between gap-4">
-            {data.logo ? (
-              <img
-                src={data.logo}
-                alt="Logo"
-                className="w-14 h-14 rounded-full object-cover border border-white/40 shadow"
-              />
-            ) : (
-              <div />
-            )}
+                    <div
+                      className="aspect-[1.75/1] w-full"
+                      style={{
+                        backgroundColor: bg ? undefined : "#f3f4f6",
+                        backgroundImage: bg ? `url(${bg})` : undefined,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        color: fc,
+                        fontFamily: ff,
+                      }}
+                    >
+                      <div className="w-full h-full px-4 py-3 flex items-center justify-between gap-4">
+                        {data.logo ? (
+                          <img
+                            src={data.logo}
+                            alt="Logo"
+                            className="w-14 h-14 rounded-full object-cover border border-white/40 shadow"
+                          />
+                        ) : (
+                          <div />
+                        )}
 
-            <div className="flex flex-col text-right leading-snug">
-              <div className="font-semibold" style={{ fontSize: fs + 4 }}>
-                {data.name || "Your Name"}
-              </div>
-              <div style={{ color: accent, fontSize: fs + 2 }}>
-                {data.title || "Job Title"}
-              </div>
-              <div className="opacity-80" style={{ fontSize: Math.max(14, fs) }}>
-                {data.company || "Company"}
-              </div>
-            </div>
-          </div>
-        </div>
+                        <div className="flex flex-col text-right leading-snug">
+                          <div className="font-semibold" style={{ fontSize: fs + 4 }}>
+                            {data.name || "Your Name"}
+                          </div>
+                          <div style={{ color: accent, fontSize: fs + 2 }}>
+                            {data.title || "Job Title"}
+                          </div>
+                          <div className="opacity-80" style={{ fontSize: Math.max(14, fs) }}>
+                            {data.company || "Company"}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-          <p className="text-white font-medium text-sm">{t.name}</p>
-        </div>
-      </button>
-    </div>
-  );
-})}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                      <p className="text-white font-medium text-sm">{t.name}</p>
+                    </div>
+                  </button>
+                </div>
+              );
+            })}
 
           </div>
         )}
