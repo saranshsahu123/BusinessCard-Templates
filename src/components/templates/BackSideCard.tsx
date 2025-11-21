@@ -80,6 +80,7 @@ export const BackSideCard: React.FC<Props> = ({
   const vCardData = `BEGIN:VCARD\nVERSION:3.0\nFN:${data.name}\nTITLE:${data.title}\nORG:${data.company}\nEMAIL:${data.email}\nTEL:${data.phone}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`;
   const qrValue = (data.website && data.website.trim().length > 0) ? data.website.trim() : vCardData;
 
+
   const qrWrapperBase = "bg-white/90 shadow-sm";
   const qrWrapperClass =
     qrStyle === "soft"
@@ -200,7 +201,13 @@ export const BackSideCard: React.FC<Props> = ({
   );
 
   return (
+
+
+
+
     <div
+    // className="w-full h-full p-4 md:p-6 relative overflow-hidden shadow-lg rounded-xl transition-all duration-300"
+
       className="w-full aspect-[1.75/1] p-4 md:p-6 relative overflow-hidden shadow-lg rounded-xl transition-all duration-300"
       style={{
         ...bgStyle,

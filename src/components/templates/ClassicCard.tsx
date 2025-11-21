@@ -43,7 +43,7 @@ export const ClassicCard: React.FC<ClassicCardProps> = ({
 
   return (
     <div
-      className={`w-full aspect-[1.75/1] p-6 relative overflow-hidden ${borderClass} shadow-lg`}
+      className={`w-full h-full p-6 relative overflow-hidden ${borderClass} shadow-lg`}
       style={{
         ...getBg(),
         color: appliedText,

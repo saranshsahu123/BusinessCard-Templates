@@ -441,14 +441,24 @@ export const TemplateSelector = ({
         </div>
         <div className="bg-gradient-to-br from-muted to-background p-4 sm:p-6 md:p-8 rounded-lg overflow-x-hidden">
           <div className="bg-gradient-to-br from-muted to-background rounded-lg overflow-hidden p-4 sm:p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full"> */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full">
+
+
+
 
               {(() => {
                 const isServer = selectedTemplate.startsWith("sb:");
                 if (!isServer) {
                   return (
                     <>
-                      <div ref={previewRef} className="relative w-full max-w-full overflow-hidden">
+
+
+
+
+                      {/* <div ref={previewRef} className="relative w-full max-w-full overflow-hidden"> */}
+                      <div ref={previewRef} className="relative w-full h-[500px] overflow-hidden">
+
                         <div className="wm-screen-only" data-watermark="screen-only" />
                         {!isEditLayout && selectedConfig && (
                           <ClassicCard
@@ -462,7 +472,11 @@ export const TemplateSelector = ({
                         )}
                         {isEditLayout && selectedConfig && (
                           <div
-                            className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4 relative"
+                            // className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4 relative"
+                             className="w-full h-full rounded-lg border overflow-hidden p-4 relative"
+
+
+                            
                             style={{
                               background: selectedConfig.bgStyle === 'gradient' ? `linear-gradient(135deg, ${selectedConfig.bgColors[0]}, ${selectedConfig.bgColors[1]})` : undefined,
                               backgroundColor: selectedConfig.bgStyle === 'solid' ? selectedConfig.bgColors[0] : undefined,
@@ -518,7 +532,8 @@ export const TemplateSelector = ({
                           </div>
                         )}
                       </div>
-                      <div ref={backRef} className="relative w-full max-w-full overflow-hidden">
+                      {/* <div ref={backRef} className="relative w-full max-w-full overflow-hidden"> */}
+                      <div ref={backRef} className="relative w-full h-[500px] overflow-hidden">
                         <div className="wm-screen-only" data-watermark="screen-only" />
                         {!isEditLayout && selectedConfig && (
                           <BackSideCard
@@ -537,7 +552,9 @@ export const TemplateSelector = ({
                         )}
                         {isEditLayout && selectedConfig && (
                           <div
-                            className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden relative"
+                          className="w-full h-full rounded-lg overflow-hidden relative"
+
+                            // className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden relative"
                             style={{
                               background: selectedConfig.bgStyle === 'gradient' ? `linear-gradient(135deg, ${selectedConfig.bgColors[0]}, ${selectedConfig.bgColors[1]})` : undefined,
                               backgroundColor: selectedConfig.bgStyle === 'solid' ? selectedConfig.bgColors[0] : undefined,
@@ -640,8 +657,11 @@ export const TemplateSelector = ({
                   <>
                     <div className="flex flex-col md:flex-row gap-6">
 
-                      <div ref={previewRef} className="flex-1 relative overflow-hidden">
+                      {/* <div ref={previewRef} className="flex-1 relative overflow-hidden"> */}
+                    <div ref={previewRef} className="flex-1 relative overflow-hidden aspect-[1.75/1]">
 
+
+                        
                         <div className="wm-screen-only" data-watermark="screen-only" />
                         {!isEditLayout && (
                           <div
@@ -778,7 +798,9 @@ export const TemplateSelector = ({
                       </div>
                       <div
                         ref={backRef}
-                        className="flex-1 relative overflow-hidden rounded-lg border"
+                        // className="flex-1 relative overflow-hidden rounded-lg border"
+                        className="flex-1 relative overflow-hidden rounded-lg border aspect-[1.75/1]"
+
                         style={{
                           backgroundColor: backBg ? undefined : "#f3f4f6",
                           backgroundImage: backBg ? `url(${backBg})` : undefined,
@@ -798,7 +820,9 @@ export const TemplateSelector = ({
                               backgroundPosition: "center",
                             }}
                           >
-                            <div className="p-4 h-full">
+                            {/* <div className="p-4 h-full"> */}
+                            <div className="p-4 w-full h-full">
+
                               <BackSideCard
                                 data={data}
                                 textColor={fc}
