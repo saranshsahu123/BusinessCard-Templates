@@ -456,17 +456,25 @@ export const TemplateSelector = ({
                     return (
                         <>
                             {/* Card 1: Front Side */}
-                            <div ref={previewRef} className="
-                                w-full 
-                                max-w-[420px] 
-                                mx-auto  {/* Center on mobile when max-w is hit */}
-                                aspect-[1.75/1]
-                                rounded-xl 
-                                overflow-hidden 
-                                border 
-                                shadow-lg
-                                mb-6  {/* Added margin to separate cards on mobile */}
-                            ">
+                            <div
+  ref={previewRef}
+  className="
+    w-full 
+    max-w-[420px] 
+    mx-auto
+    rounded-xl 
+    overflow-hidden 
+    border 
+    shadow-lg 
+    relative 
+    bg-white
+    aspect-[1.75/1]
+    min-h-[200px]
+    xs:min-h-[240px]
+    sm:min-h-[260px]
+  "
+>
+
                                 <div className="wm-screen-only" data-watermark="screen-only" />
 
                                 {isEditLayout && selectedConfig && (
@@ -533,17 +541,25 @@ export const TemplateSelector = ({
                             </div>
                             
                             {/* Card 2: Back Side */}
-                            <div ref={backRef} className="
-                                w-full 
-                                max-w-[420px] 
-                                mx-auto  {/* Center on mobile when max-w is hit */}
-                                aspect-[1.75/1] 
-                                rounded-xl 
-                                overflow-hidden 
-                                border 
-                                shadow-lg 
-                                flex items-center justify-center relative  {/* Added class for centering and relative for inner abs positioning */}
-                            ">
+                            <div
+  ref={backRef}
+  className="
+    w-full 
+    max-w-[420px] 
+    mx-auto
+    rounded-xl 
+    overflow-hidden 
+    border 
+    shadow-lg 
+    relative 
+    bg-white
+    aspect-[1.75/1]
+    min-h-[200px]
+    xs:min-h-[240px]
+    sm:min-h-[260px]
+  "
+>
+
                                 <div className="wm-screen-only" data-watermark="screen-only" />
                                 
                                 {!isEditLayout && selectedConfig && (
