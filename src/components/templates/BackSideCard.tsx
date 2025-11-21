@@ -20,7 +20,6 @@ interface Props {
   fontFamily?: string;
   fontSize?: number;
 
-  // QR PROPS
   showLargeQR?: boolean;
   transparentBg?: boolean;
   compact?: boolean;
@@ -60,11 +59,23 @@ export const BackSideCard: React.FC<Props> = ({
   qrLogoUrl,
   qrStyle = "classic",
 }) => {
-
   const appliedAccent = accentColor ?? config?.accentColor ?? "#1f2937";
 
   const hasAnyContact =
     !!(data.email || data.phone || data.website || data.address);
+
+  /**
+   * RESPONSIVE FONT SCALE
+   * Auto-adjust based on screen width
+   */
+  const responsiveFont = useMemo(() => {
+    if (typeof window === "undefined") return fontSize;
+    const w = window.innerWidth;
+
+    if (w <= 360) return fontSize * 0.82; // very small phones
+    if (w <= 400) return fontSize * 0.9;  // Pixel 7a + Redmi 10s
+    return fontSize;
+  }, [fontSize]);
 
   // Background
   const bgStyle: React.CSSProperties = useMemo(() => {
@@ -82,7 +93,6 @@ export const BackSideCard: React.FC<Props> = ({
   const baseBgColor = (config?.bgColors ?? background?.colors ?? ["#ffffff"])[0];
   const appliedText = textColor ?? config?.textColor ?? getContrast(baseBgColor);
 
-  // vCard
   const vCardData = `BEGIN:VCARD
 VERSION:3.0
 FN:${data.name || ""}
@@ -94,13 +104,11 @@ URL:${data.website || ""}
 ADR:${data.address || ""}
 END:VCARD`;
 
-  // QR selection logic
   const qrValue =
     data.website && data.website.trim().length > 0
       ? data.website.trim()
       : vCardData;
 
-  // QR center logo
   const qrImageSettings = useMemo(() => {
     if (!qrLogoUrl) return undefined;
     return {
@@ -111,7 +119,19 @@ END:VCARD`;
     };
   }, [qrLogoUrl]);
 
-  // QR wrapper style
+  /**
+   * Responsive QR size
+   */
+  const responsiveQRSize = useMemo(() => {
+    const w = typeof window !== "undefined" ? window.innerWidth : 430;
+
+    if (qrSize) return qrSize;
+    if (w <= 360) return 80;
+    if (w <= 400) return 90;
+    return showLargeQR ? 110 : 70;
+  }, [qrSize, showLargeQR]);
+
+  // QR Wrapper Style
   const qrWrapperClass =
     qrStyle === "soft"
       ? "bg-white/90 shadow-md rounded-2xl border border-white/70"
@@ -120,67 +140,26 @@ END:VCARD`;
       : qrStyle === "outline"
       ? "bg-transparent shadow-none rounded-xl border-2 border-white/90"
       : qrStyle === "pill"
-      ? "bg-white/90 shadow-sm rounded-full border border-white/80 px-4"
-      : "bg-white/90 shadow-sm rounded-xl";
-
-  const QR = (
-    <div className={`${qrWrapperClass} p-2 backdrop-blur-sm inline-block`}>
-      <QRCodeSVG
-        value={qrValue}
-        size={qrSize ?? (showLargeQR ? 110 : 70)}
-        fgColor={qrColor}
-        imageSettings={qrImageSettings}
-      />
-    </div>
-  );
-
-  const Contacts = (
-    <div className="text-center space-y-1">
-      {hasAnyContact ? (
-        <>
-          {data.email && (
-            <div>
-              <strong style={{ color: appliedAccent }}>✉</strong> {data.email}
-            </div>
-          )}
-          {data.phone && (
-            <div>
-              <strong style={{ color: appliedAccent }}>✆</strong> {data.phone}
-            </div>
-          )}
-          {data.website && (
-            <div>
-              <strong style={{ color: appliedAccent }}>⌂</strong> {data.website}
-            </div>
-          )}
-          {data.address && (
-            <div>
-              <strong style={{ color: appliedAccent }}>📍</strong> {data.address}
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          <div><strong style={{ color: appliedAccent }}>✉</strong> email@example.com</div>
-          <div><strong style={{ color: appliedAccent }}>✆</strong> +91 00000 00000</div>
-          <div><strong style={{ color: appliedAccent }}>⌂</strong> your-website.com</div>
-          <div><strong style={{ color: appliedAccent }}>📍</strong> Your Address</div>
-        </>
-      )}
-    </div>
-  );
+      ? "bg-white/90 shadow-sm rounded-full border border-white/80 px-6 py-3"
+      : "bg-white/90 shadow-sm rounded-xl p-2";
 
   return (
     <div
-      className="w-full h-full flex items-center justify-center p-4 relative rounded-xl"
+      className="
+        w-full h-full 
+        flex flex-col items-center justify-center 
+        p-4 
+        relative rounded-xl
+        overflow-hidden
+      "
       style={{
         ...bgStyle,
         color: appliedText,
         fontFamily: fontFamily ?? config?.fontFamily ?? "Inter, Arial, sans-serif",
-        fontSize,
+        fontSize: responsiveFont,
       }}
     >
-      {/* Background texture */}
+      {/* Background pattern */}
       {!transparentBg && !compact && (
         <div className="absolute inset-0 opacity-10 pointer-events-none">
           <svg width="100%" height="100%">
@@ -199,9 +178,45 @@ END:VCARD`;
         </div>
       )}
 
-      <div className="relative z-10 flex flex-col items-center justify-center space-y-3">
-        {Contacts}
-        {QR}
+      {/* CONTACT + QR */}
+      <div className="relative z-10 w-full flex flex-col items-center justify-center gap-3">
+
+        {/* Contact Section */}
+        <div className="text-center leading-tight space-y-1 w-full">
+          {hasAnyContact ? (
+            <>
+              {data.email && (
+                <div><strong style={{ color: appliedAccent }}>✉</strong> {data.email}</div>
+              )}
+              {data.phone && (
+                <div><strong style={{ color: appliedAccent }}>✆</strong> {data.phone}</div>
+              )}
+              {data.website && (
+                <div><strong style={{ color: appliedAccent }}>⌂</strong> {data.website}</div>
+              )}
+              {data.address && (
+                <div><strong style={{ color: appliedAccent }}>📍</strong> {data.address}</div>
+              )}
+            </>
+          ) : (
+            <>
+              <div><strong style={{ color: appliedAccent }}>✉</strong> email@example.com</div>
+              <div><strong style={{ color: appliedAccent }}>✆</strong> +91 00000 00000</div>
+              <div><strong style={{ color: appliedAccent }}>⌂</strong> your-website.com</div>
+              <div><strong style={{ color: appliedAccent }}>📍</strong> Your Address</div>
+            </>
+          )}
+        </div>
+
+        {/* QR Code */}
+        <div className={qrWrapperClass}>
+          <QRCodeSVG
+            value={qrValue}
+            size={responsiveQRSize}
+            fgColor={qrColor}
+            imageSettings={qrImageSettings}
+          />
+        </div>
       </div>
     </div>
   );

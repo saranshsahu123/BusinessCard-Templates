@@ -358,17 +358,53 @@ export const TemplateSelector = ({
     <div className="space-y-6 overflow-x-hidden">
       <div className="bg-card rounded-xl p-6 shadow-[var(--shadow-card)] border border-border animate-fade-in [animation-delay:0.1s] opacity-0 [animation-fill-mode:forwards]">
         <div className="flex flex-col gap-4 mb-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-foreground">Selected Design Preview</h2>
-            <div className="flex items-center gap-2">
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={isEditLayout} onChange={(e) => setIsEditLayout(e.target.checked)} />
-                Edit layout
-              </label>
-              <Button onClick={buyCurrent} size="sm" className="gap-2">Buy</Button>
-              <Button onClick={addToCart} variant="outline" size="sm" className="gap-2">Add to Cart</Button>
-            </div>
-          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
+  {/* Title */}
+  <h2 className="text-xl sm:text-2xl font-bold text-foreground">
+    Selected Design Preview
+  </h2>
+
+  {/* Buttons Group */}
+  <div className="
+    flex flex-wrap
+    items-center 
+    justify-start sm:justify-end
+    gap-2
+  ">
+
+    {/* EDIT LAYOUT BUTTON */}
+    <Button 
+      onClick={() => setIsEditLayout(!isEditLayout)}
+      size="sm"
+      variant="secondary"
+      className="px-3 py-1 text-sm"
+    >
+      {isEditLayout ? "Done" : "Edit Layout"}
+    </Button>
+
+    {/* BUY BUTTON */}
+    <Button 
+      onClick={buyCurrent}
+      size="sm"
+      className="px-3 py-1 text-sm"
+    >
+      Buy
+    </Button>
+
+    {/* ADD TO CART */}
+    <Button 
+      onClick={addToCart}
+      variant="outline"
+      size="sm"
+      className="px-3 py-1 text-sm"
+    >
+      Add to Cart
+    </Button>
+
+  </div>
+</div>
+
 
           {false && (
             <div className="grid gap-4 md:grid-cols-2">
@@ -478,17 +514,20 @@ export const TemplateSelector = ({
                                 <div className="wm-screen-only" data-watermark="screen-only" />
 
                                 {isEditLayout && selectedConfig && (
-                                    <div
-                                        className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4 relative"
-                                        // ... (rest of the front-side-edit-layout styles)
-                                        style={{
-                                            background: selectedConfig.bgStyle === 'gradient' ? `linear-gradient(135deg, ${selectedConfig.bgColors[0]}, ${selectedConfig.bgColors[1]})` : undefined,
-                                            backgroundColor: selectedConfig.bgStyle === 'solid' ? selectedConfig.bgColors[0] : undefined,
-                                            color: hasOverrides ? (textColor ?? selectedConfig.textColor) : selectedConfig.textColor,
-                                            fontFamily: hasOverrides ? selectedFont : undefined,
-                                            fontSize: `${hasOverrides ? fontSize : 16}px`,
-                                        }}
-                                    >
+  <div
+  className="absolute inset-0 flex flex-col items-center justify-between p-4"
+  style={{
+    backgroundImage: selectedConfig?.back_background_url
+      ? `url(${selectedConfig.back_background_url})`
+      : undefined,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    fontFamily: selectedFont,
+    color: textColor,
+    fontSize: `${fontSize}px`,
+  }}
+>
+
                                         <div className="absolute inset-0">
                                             {/* Name draggable element */}
                                             <div
@@ -541,28 +580,30 @@ export const TemplateSelector = ({
                             </div>
                             
                             {/* Card 2: Back Side */}
-                            <div
+                           <div
   ref={backRef}
   className="
     w-full 
     max-w-[420px] 
     mx-auto
-    rounded-xl 
-    overflow-hidden 
-    border 
-    shadow-lg 
-    relative 
     bg-white
-    aspect-[1.75/1]
-    min-h-[200px]
-    xs:min-h-[240px]
-    sm:min-h-[260px]
+    rounded-xl
+    border
+    shadow-lg
+    relative
+    overflow-hidden
+
+    aspect-auto         /* allow dynamic height on mobile */
+    sm:aspect-[1.75/1]  /* restore ratio on bigger screens */
+    min-h-[260px]
+    xs:min-h-[300px]
   "
 >
 
                                 <div className="wm-screen-only" data-watermark="screen-only" />
                                 
                                 {!isEditLayout && selectedConfig && (
+                                  
                                     <BackSideCard
                                         data={data}
                                         background={{
