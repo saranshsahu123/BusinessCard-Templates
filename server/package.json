@@ -5,9 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch index.js",
-    "start": "node index.js",
-    "prod:3001": "set NODE_ENV=production&& set PORT=3001&& node index.js",
-    "dev:3002": "set PORT=3002&& node --watch index.js"
+    "start": "node index.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -21,7 +19,6 @@
     "morgan": "^1.10.1",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^7.0.10",
-    "razorpay": "^2.9.6",
-    "vite_react_shadcn_ts": "file:.."
+    "razorpay": "^2.9.6"
   }
 }
