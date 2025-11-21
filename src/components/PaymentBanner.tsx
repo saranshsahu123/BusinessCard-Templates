@@ -12,7 +12,7 @@ export const PaymentBanner = () => {
                         </div>
                         <div>
                             <h3 className="font-semibold text-foreground">
-                                Premium Business Cards Starting at $2.99
+                                Premium Business Cards Starting at ₹2.99
                             </h3>
                             <p className="text-sm text-muted-foreground">
                                 Instant download • HD Quality • No watermarks

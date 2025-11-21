@@ -29,6 +29,16 @@ const paymentSchema = new mongoose.Schema(
     card_last4: { type: String, default: null },
     issuer_bank: { type: String, default: null },
 
+    // Yahan pe har order me kaun-kaun se cards kharide gaye woh save hoga
+    items: [
+      {
+        templateId: { type: String, required: true },
+        title: { type: String, default: null },
+        price: { type: Number, default: null },
+        templateName: { type: String, default: null }
+      },
+    ],
+
     payment_method_details: { type: Object, default: null }, // raw details from gateway
   },
   { timestamps: true }

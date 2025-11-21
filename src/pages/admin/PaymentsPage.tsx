@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/services/api";
 
+interface OrderedItem {
+  templateId: string;
+  title?: string;
+  price?: number;
+  templateName?: string;
+}
+
 interface Payment {
   _id: string;
   email: string;
@@ -27,6 +34,8 @@ interface Payment {
   city?: string | null;
   state?: string | null;
   pincode?: string | null;
+
+  items?: OrderedItem[];
 }
 
 const PaymentsPage = () => {
@@ -141,6 +150,8 @@ const PaymentsPage = () => {
                 .filter(Boolean)
                 .join(", ") || "-";
 
+            const hasItems = (p.items || []).length > 0;
+
             return (
               <div
                 key={p._id}
@@ -241,6 +252,44 @@ const PaymentsPage = () => {
                       {p.live_location || "-"}
                     </div>
                   </div>
+                </div>
+
+                {/* 4. Ordered Cards */}
+                <div>
+                  <h2 className="font-semibold text-sm mb-2">
+                    4. Ordered Cards
+                  </h2>
+                  {hasItems ? (
+                    <div className="space-y-1">
+                      {(p.items || []).map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between text-xs md:text-sm"
+                        >
+                          <div>
+                            <span className="font-medium">
+                              Template ID:
+                            </span>{" "}
+                            {item.templateId}
+                            {item.title ? (
+                              <>
+                                {" "}
+                                - <span>{item.title}</span>
+                              </>
+                            ) : null}
+                          </div>
+                          <div>
+                            <span className="font-medium">Price:</span>{" "}
+                            {item.price != null ? `₹${item.price}` : "-"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-gray-500">
+                      No card items saved for this payment.
+                    </div>
+                  )}
                 </div>
               </div>
             );

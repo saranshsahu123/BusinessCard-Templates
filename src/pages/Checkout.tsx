@@ -153,6 +153,13 @@ export default function CheckoutPage() {
                 city,
                 state,
                 pincode,
+                // yahan se admin ke liye order items save honge
+                items: items.map((it) => ({
+                  templateId: it.id,
+                  title: it.data?.name || "Business Card",
+                  price: it.price,
+                  templateName: byId[it.id]?.name || null,
+                })),
               }),
             });
 
