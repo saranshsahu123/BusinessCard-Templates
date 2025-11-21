@@ -28,7 +28,7 @@ export default function CartPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="text-sm">${it.price.toFixed(2)}</div>
+                  <div className="text-sm">₹{it.price.toFixed(2)}</div>
                   <Button
                     variant="outline"
                     size="sm"
@@ -42,7 +42,7 @@ export default function CartPage() {
 
             <div className="flex items-center justify-between border-t pt-4">
               <div className="font-semibold">Total</div>
-              <div className="font-semibold">${total.toFixed(2)}</div>
+              <div className="font-semibold">₹{total.toFixed(2)}</div>
             </div>
 
             <div className="flex items-center justify-end gap-2">
