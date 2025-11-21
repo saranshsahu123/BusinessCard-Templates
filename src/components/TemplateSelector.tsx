@@ -515,7 +515,7 @@ export const TemplateSelector = ({
                           </div>
                         )}
                       </div>
-                      <div ref={backRef} className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden relative">
+                      <div ref={backRef} className="relative w-full h-full max-w-full overflow-hidden flex items-center justify-center">
                         <div className="wm-screen-only" data-watermark="screen-only" />
                         {!isEditLayout && selectedConfig && (
                           <BackSideCard
