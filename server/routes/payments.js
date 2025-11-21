@@ -110,6 +110,9 @@ router.post('/verify', authRequired, async (req, res) => {
     const state = req.body.state || null;
     const pincode = req.body.pincode || null;
 
+    // Frontend se aane wale ordered cards
+    const items = Array.isArray(req.body.items) ? req.body.items : [];
+
     // Save successful payment in DB
     try {
       await Payment.create({
@@ -133,6 +136,7 @@ router.post('/verify', authRequired, async (req, res) => {
         bank_reference_id,
         card_last4,
         issuer_bank,
+        items,
         payment_method_details: paymentDetails || null,
       });
 
