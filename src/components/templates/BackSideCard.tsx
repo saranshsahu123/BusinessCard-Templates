@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
-import type { ClassicDesignConfig } from "@/lib/classicTemplates";
 import { QRCodeSVG } from "qrcode.react";
+import type { ClassicDesignConfig } from "@/lib/classicTemplates";
 
 interface Props {
   data: {
@@ -19,21 +19,21 @@ interface Props {
   accentColor?: string;
   fontFamily?: string;
   fontSize?: number;
+
+  // QR PROPS
   showLargeQR?: boolean;
   transparentBg?: boolean;
   compact?: boolean;
   qrSize?: number;
-  // New Props
   qrColor?: string;
   qrLogoUrl?: string;
   qrStyle?: "classic" | "soft" | "contrast" | "outline" | "pill";
 }
 
-// Helper: Move outside component
 const getContrast = (hex: string) => {
   try {
     const v = hex.replace("#", "");
-    const fullHex = v.length === 3 ? v.split("").map((c) => c + c).join("") : v;
+    const fullHex = v.length === 3 ? v.split("").map(c => c + c).join("") : v;
     const r = parseInt(fullHex.substring(0, 2), 16);
     const g = parseInt(fullHex.substring(2, 4), 16);
     const b = parseInt(fullHex.substring(4, 6), 16);
@@ -60,11 +60,16 @@ export const BackSideCard: React.FC<Props> = ({
   qrLogoUrl,
   qrStyle = "classic",
 }) => {
-  const appliedAccent = accentColor ?? config?.accentColor ?? "#1f2937";
-  const hasAnyContact = !!(data.email || data.phone || data.website || data.address);
 
+  const appliedAccent = accentColor ?? config?.accentColor ?? "#1f2937";
+
+  const hasAnyContact =
+    !!(data.email || data.phone || data.website || data.address);
+
+  // Background
   const bgStyle: React.CSSProperties = useMemo(() => {
     if (transparentBg) return {};
+
     const style = config?.bgStyle ?? background?.style ?? "solid";
     const colors = config?.bgColors ?? background?.colors ?? ["#ffffff"];
 
@@ -77,131 +82,97 @@ export const BackSideCard: React.FC<Props> = ({
   const baseBgColor = (config?.bgColors ?? background?.colors ?? ["#ffffff"])[0];
   const appliedText = textColor ?? config?.textColor ?? getContrast(baseBgColor);
 
-  const vCardData = `BEGIN:VCARD\nVERSION:3.0\nFN:${data.name}\nTITLE:${data.title}\nORG:${data.company}\nEMAIL:${data.email}\nTEL:${data.phone}\nURL:${data.website}\nADR:${data.address}\nEND:VCARD`;
-  const qrValue = (data.website && data.website.trim().length > 0) ? data.website.trim() : vCardData;
+  // vCard
+  const vCardData = `BEGIN:VCARD
+VERSION:3.0
+FN:${data.name || ""}
+TITLE:${data.title || ""}
+ORG:${data.company || ""}
+EMAIL:${data.email || ""}
+TEL:${data.phone || ""}
+URL:${data.website || ""}
+ADR:${data.address || ""}
+END:VCARD`;
 
-  const qrWrapperBase = "bg-white/90 shadow-sm";
-  const qrWrapperClass =
-    qrStyle === "soft"
-      ? "bg-white/90 shadow-md rounded-2xl border border-white/70"
-      : qrStyle === "contrast"
-        ? "bg-slate-900 shadow-lg rounded-xl border-2 border-white"
-        : qrStyle === "outline"
-          ? "bg-transparent shadow-none rounded-xl border-2 border-white/90"
-          : qrStyle === "pill"
-            ? "bg-white/90 shadow-sm rounded-full border border-white/80 px-4"
-            : "bg-white/90 shadow-sm rounded-xl";
+  // QR selection logic
+  const qrValue =
+    data.website && data.website.trim().length > 0
+      ? data.website.trim()
+      : vCardData;
 
-  // Dynamic Image Settings for QR
+  // QR center logo
   const qrImageSettings = useMemo(() => {
     if (!qrLogoUrl) return undefined;
     return {
       src: qrLogoUrl,
-      x: undefined,
-      y: undefined,
-      height: 24,
-      width: 24,
-      excavate: true, // Cuts a hole in the QR code for the logo
+      height: 26,
+      width: 26,
+      excavate: true,
     };
   }, [qrLogoUrl]);
 
-  const renderContent = () => (
-    <div className="relative z-10 flex items-center justify-center h-full w-full">
-      {compact ? (
-        <div className="w-full flex items-center justify-center gap-4 px-2" style={{ lineHeight: 1.2 }}>
-          <div className="text-sm space-y-1 text-center">
-            {hasAnyContact ? (
-              <>
-                {data.email && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>✉</strong> {data.email}
-                  </div>
-                )}
-                {data.phone && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>✆</strong> {data.phone}
-                  </div>
-                )}
-                {data.website && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>⌂</strong> {data.website}
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <div><strong style={{ color: appliedAccent }}>✉</strong> email@example.com</div>
-                <div><strong style={{ color: appliedAccent }}>✆</strong> +91 00000 00000</div>
-                <div><strong style={{ color: appliedAccent }}>⌂</strong> your-website.com</div>
-              </>
-            )}
-          </div>
+  // QR wrapper style
+  const qrWrapperClass =
+    qrStyle === "soft"
+      ? "bg-white/90 shadow-md rounded-2xl border border-white/70"
+      : qrStyle === "contrast"
+      ? "bg-slate-900 shadow-lg rounded-xl border-2 border-white"
+      : qrStyle === "outline"
+      ? "bg-transparent shadow-none rounded-xl border-2 border-white/90"
+      : qrStyle === "pill"
+      ? "bg-white/90 shadow-sm rounded-full border border-white/80 px-4"
+      : "bg-white/90 shadow-sm rounded-xl";
 
-          {(data.name || data.email) && (
-            <div className={`${qrWrapperClass} p-1.5 backdrop-blur-sm`}>
-              <QRCodeSVG
-                value={qrValue}
-                size={qrSize ?? (showLargeQR ? 80 : 60)}
-                fgColor={qrColor}
-                imageSettings={qrImageSettings}
-              />
+  const QR = (
+    <div className={`${qrWrapperClass} p-2 backdrop-blur-sm inline-block`}>
+      <QRCodeSVG
+        value={qrValue}
+        size={qrSize ?? (showLargeQR ? 110 : 70)}
+        fgColor={qrColor}
+        imageSettings={qrImageSettings}
+      />
+    </div>
+  );
+
+  const Contacts = (
+    <div className="text-center space-y-1">
+      {hasAnyContact ? (
+        <>
+          {data.email && (
+            <div>
+              <strong style={{ color: appliedAccent }}>✉</strong> {data.email}
             </div>
           )}
-        </div>
+          {data.phone && (
+            <div>
+              <strong style={{ color: appliedAccent }}>✆</strong> {data.phone}
+            </div>
+          )}
+          {data.website && (
+            <div>
+              <strong style={{ color: appliedAccent }}>⌂</strong> {data.website}
+            </div>
+          )}
+          {data.address && (
+            <div>
+              <strong style={{ color: appliedAccent }}>📍</strong> {data.address}
+            </div>
+          )}
+        </>
       ) : (
-        <div className="flex flex-col items-center justify-center w-full space-y-3">
-          <div className="text-center space-y-1">
-            {hasAnyContact ? (
-              <>
-                {data.email && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>✉</strong> {data.email}
-                  </div>
-                )}
-                {data.phone && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>✆</strong> {data.phone}
-                  </div>
-                )}
-                {data.website && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>⌂</strong> {data.website}
-                  </div>
-                )}
-                {data.address && (
-                  <div>
-                    <strong style={{ color: appliedAccent }}>📍</strong> {data.address}
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <div><strong style={{ color: appliedAccent }}>✉</strong> email@example.com</div>
-                <div><strong style={{ color: appliedAccent }}>✆</strong> +91 00000 00000</div>
-                <div><strong style={{ color: appliedAccent }}>⌂</strong> your-website.com</div>
-                <div><strong style={{ color: appliedAccent }}>📍</strong> Your Address, City</div>
-              </>
-            )}
-          </div>
-
-          {(data.name || data.email) && (
-            <div className={`${qrWrapperClass} p-2 backdrop-blur-sm`}>
-              <QRCodeSVG
-                value={vCardData}
-                size={qrSize ?? (showLargeQR ? 100 : 64)}
-                fgColor={qrColor}
-                imageSettings={qrImageSettings}
-              />
-            </div>
-          )}
-        </div>
+        <>
+          <div><strong style={{ color: appliedAccent }}>✉</strong> email@example.com</div>
+          <div><strong style={{ color: appliedAccent }}>✆</strong> +91 00000 00000</div>
+          <div><strong style={{ color: appliedAccent }}>⌂</strong> your-website.com</div>
+          <div><strong style={{ color: appliedAccent }}>📍</strong> Your Address</div>
+        </>
       )}
     </div>
   );
 
   return (
     <div
-      className="w-full aspect-[1.75/1] p-4 md:p-6 relative overflow-hidden shadow-lg rounded-xl transition-all duration-300"
+      className="w-full h-full flex items-center justify-center p-4 relative rounded-xl"
       style={{
         ...bgStyle,
         color: appliedText,
@@ -209,19 +180,29 @@ export const BackSideCard: React.FC<Props> = ({
         fontSize,
       }}
     >
-      {!transparentBg && (
+      {/* Background texture */}
+      {!transparentBg && !compact && (
         <div className="absolute inset-0 opacity-10 pointer-events-none">
           <svg width="100%" height="100%">
             <defs>
               <pattern id="topo" width="100" height="100" patternUnits="userSpaceOnUse">
-                <path d="M0,50 C25,0 75,0 100,50 C75,100 25,100 0,50Z" fill="none" stroke={appliedAccent} strokeWidth="1" />
+                <path
+                  d="M0,50 C25,0 75,0 100,50 C75,100 25,100 0,50Z"
+                  fill="none"
+                  stroke={appliedAccent}
+                  strokeWidth="1"
+                />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#topo)" />
           </svg>
         </div>
       )}
-      {renderContent()}
+
+      <div className="relative z-10 flex flex-col items-center justify-center space-y-3">
+        {Contacts}
+        {QR}
+      </div>
     </div>
   );
 };

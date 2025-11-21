@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { BusinessCardData } from "./BusinessCardForm";
-import { ClassicCard } from "./templates/ClassicCard";
+
 import { Check, Download } from "lucide-react";
 import { downloadAsImage } from "@/lib/utils";
 import { Button } from "./ui/button";
-import { classicTemplates } from "@/lib/classicTemplates";
+
 import { BackSideCard } from "./templates/BackSideCard";
 import { QRCodeSVG } from "qrcode.react";
 import { useCart } from "@/contexts/CartContext";
@@ -33,7 +33,7 @@ interface TemplateSelectorProps {
   onAccentColorChange?: (color: string) => void;
 }
 
-const templates = classicTemplates;
+
 
 export const TemplateSelector = ({
   data,
@@ -46,19 +46,23 @@ export const TemplateSelector = ({
   onTextColorChange,
   onAccentColorChange,
 }: TemplateSelectorProps) => {
-  const [selectedTemplate, setSelectedTemplate] = useState(templates[0]?.id ?? "classic-001");
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const previewRef = useRef<HTMLDivElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
-  const selectedConfig = templates.find((t) => t.id === selectedTemplate) || templates[0];
+  // const selectedConfig = templates.find((t) => t.id === selectedTemplate) || templates[0];
   const [page, setPage] = useState(0);
   const pageSize = 20;
   const [sbTemplates, setSbTemplates] = useState<Template[]>([]);
-  const combined = [
-    // Show admin/server templates first like before
-    ...sbTemplates.map((t) => ({ kind: "server" as const, id: `sb:${t.id}`, server: t })),
-    ...templates.map((t) => ({ kind: "classic" as const, id: t.id, classic: t })),
-  ];
+  const sid = selectedTemplate.startsWith("sb:") ? selectedTemplate.slice(3) : null;
+const selectedConfig = sbTemplates.find(x => x.id === sid)?.config || {};
+  const combined = sbTemplates.map((t) => ({
+  kind: "server",
+  id: `sb:${t.id}`,
+  server: t,
+}));
+
   const totalPages = Math.max(1, Math.ceil(combined.length / pageSize));
   const pagedTemplates = combined.slice(page * pageSize, page * pageSize + pageSize);
   const cartCtx = useCart();
@@ -439,27 +443,20 @@ export const TemplateSelector = ({
           )}
 
         </div>
-        <div className="bg-gradient-to-br from-muted to-background p-4 sm:p-6 md:p-8 rounded-lg overflow-x-hidden">
-          <div className="bg-gradient-to-br from-muted to-background rounded-lg overflow-hidden p-4 sm:p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+        <div className="w-full py-6 flex items-center justify-center">
+  <div className="flex items-center justify-center gap-10 w-full">
+
+            <div className="z gap-6 w-full h-full">
 
               {(() => {
                 const isServer = selectedTemplate.startsWith("sb:");
                 if (!isServer) {
                   return (
                     <>
-                      <div ref={previewRef} className="relative w-full max-w-full overflow-hidden">
+                      <div ref={previewRef} className="relative w-full h-full max-w-full overflow-hidden flex items-center justify-center">
+
                         <div className="wm-screen-only" data-watermark="screen-only" />
-                        {!isEditLayout && selectedConfig && (
-                          <ClassicCard
-                            data={data}
-                            config={selectedConfig}
-                            fontFamily={hasOverrides ? selectedFont : undefined}
-                            fontSize={hasOverrides ? fontSize : undefined}
-                            textColor={hasOverrides ? textColor : undefined}
-                            accentColor={hasOverrides ? accentColor : undefined}
-                          />
-                        )}
+                        
                         {isEditLayout && selectedConfig && (
                           <div
                             className="w-full aspect-[1.75/1] rounded-lg border overflow-hidden p-4 relative"
@@ -522,18 +519,23 @@ export const TemplateSelector = ({
                         <div className="wm-screen-only" data-watermark="screen-only" />
                         {!isEditLayout && selectedConfig && (
                           <BackSideCard
-                            data={data}
-                            background={{
-                              style: selectedConfig.bgStyle === "solid" ? "solid" : "gradient",
-                              colors: selectedConfig.bgColors,
-                            }}
-                            textColor={hasOverrides ? (textColor ?? selectedConfig.textColor) : selectedConfig.textColor}
-                            accentColor={hasOverrides ? (accentColor ?? selectedConfig.accentColor) : selectedConfig.accentColor}
-                            fontFamily={hasOverrides ? selectedFont : undefined}
-                            fontSize={hasOverrides ? fontSize : undefined}
-                            qrStyle={qrStyle}
-                            qrColor={qrColor}
-                          />
+  data={data}
+  background={{
+  style: selectedConfig.bgStyle || "solid",
+  colors: selectedConfig.bgColors || ["#ffffff"],
+}}
+
+  textColor={hasOverrides ? textColor : selectedConfig.textColor}
+  accentColor={hasOverrides ? accentColor : selectedConfig.accentColor}
+  fontFamily={hasOverrides ? selectedFont : undefined}
+  fontSize={hasOverrides ? fontSize : undefined}
+
+  /* FIXED ADDED PROPS */
+  qrStyle={qrStyle}
+  qrColor={qrColor}
+  qrLogoUrl={data.logo ?? undefined}
+  qrSize={backSizes.qr}   // ⭐ connect resize handle
+/>
                         )}
                         {isEditLayout && selectedConfig && (
                           <div
@@ -610,7 +612,12 @@ export const TemplateSelector = ({
                                 onTouchStart={(e) => onBackDragStart('qr', e)}
                               >
                                 <div className={`${qrWrapperClass} inline-block p-1.5 backdrop-blur-sm`}>
-                                  <QRCodeSVG value={qrValue} size={backSizes.qr} fgColor={qrColor} />
+                                  <QRCodeSVG
+    value={qrValue}
+    size={backSizes.qr}     // resizing works
+    fgColor={qrColor}       // color updates
+/>
+
                                 </div>
                                 <span
                                   className="absolute w-3 h-3 bg-primary rounded-sm cursor-nwse-resize"
@@ -938,89 +945,75 @@ export const TemplateSelector = ({
           <div className="text-sm text-muted-foreground">No classic templates available.</div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-            {pagedTemplates.map((item) => (
-              <div key={item.id} className="relative">
-                <button
-                  onClick={() => setSelectedTemplate(item.id)}
-                  className={`group relative rounded-lg overflow-hidden transition-all duration-300 border-2 ${selectedTemplate === item.id
-                      ? "border-primary shadow-[var(--shadow-hover)]"
-                      : "border-border hover:border-primary/50 hover:shadow-[var(--shadow-card)]"
-                    }`}
-                >
-                  {selectedTemplate === item.id && (
-                    <div className="absolute top-2 right-2 z-10 bg-primary text-primary-foreground rounded-full p-1">
-                      <Check className="w-4 h-4" />
-                    </div>
-                  )}
-                  {item.kind === "classic" ? (
-                    <>
-                      <div
-                        ref={(el) => { cardRefs.current[item.id] = el; }}
-                        className="pointer-events-none aspect-[1.75/1] w-full relative"
-                      >
-                        <ClassicCard
-                          data={data}
-                          config={item.classic}
-                          fontFamily={hasOverrides ? selectedFont : undefined}
-                          fontSize={hasOverrides ? fontSize : undefined}
-                          textColor={hasOverrides ? textColor : undefined}
-                          accentColor={hasOverrides ? accentColor : undefined}
-                        />
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                        <p className="text-white font-medium text-sm">{item.classic.name}</p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {(() => {
-                        const t = item.server;
-                        const bg = t?.thumbnail_url || t?.background_url || undefined;
-                        const cfg: any = t?.config || {};
-                        const fc = cfg.fontColor || "#000000";
-                        const fs = cfg.fontSize || 16;
-                        const accent = cfg.accentColor || "#0ea5e9";
-                        const ff = cfg.fontFamily || "Inter, Arial, sans-serif";
-                        const nameSize = Math.max(18, fs + 4);
-                        const titleSize = Math.max(16, fs + 2);
-                        return (
-                          <div
-                            className="pointer-events-none aspect-[1.75/1] w-full relative"
-                            style={{
-                              backgroundColor: bg ? undefined : "#f3f4f6",
-                              backgroundImage: bg ? `url(${bg})` : undefined,
-                              backgroundSize: "cover",
-                              backgroundPosition: "center",
-                              color: fc,
-                              fontFamily: ff,
-                            }}
-                          >
-                            <div className="w-full h-full px-5 py-4 flex items-center justify-between gap-4">
-                              {data.logo ? (
-                                <div className="flex-shrink-0">
-                                  <img src={data.logo} alt="Logo" className="w-16 h-16 object-cover rounded-full border border-white/50 shadow" />
-                                </div>
-                              ) : <div />}
-                              <div className="flex flex-col text-right leading-snug">
-                                <div className="font-semibold" style={{ fontFamily: ff, fontSize: nameSize }}>
-                                  {data.name || "Your Name"}
-                                </div>
-                                <div style={{ color: accent, fontSize: titleSize }}>{data.title || "Job Title"}</div>
-                                <div className="opacity-80" style={{ fontSize: Math.max(14, fs) }}>{data.company || "Company"}</div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })()}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                        <p className="text-white font-medium text-sm">{item.server?.name || "Template"}</p>
-                      </div>
-                    </>
-                  )}
-                </button>
-                {/* tile quick download removed in commerce flow */}
+            {pagedTemplates.map((item) => {
+  const t = item.server;
+  const bg = t?.thumbnail_url || t?.background_url || undefined;
+  const cfg: any = t?.config || {};
+  const fc = cfg.fontColor || "#000000";
+  const fs = cfg.fontSize || 16;
+  const accent = cfg.accentColor || "#0ea5e9";
+  const ff = cfg.fontFamily || "Inter, Arial, sans-serif";
+
+  return (
+    <div key={item.id} className="relative">
+      <button
+        onClick={() => setSelectedTemplate(item.id)}
+        className={`group relative rounded-lg overflow-hidden border-2 transition-all ${
+          selectedTemplate === item.id
+            ? "border-primary shadow-lg"
+            : "border-border hover:border-primary/50 hover:shadow"
+        }`}
+      >
+        {selectedTemplate === item.id && (
+          <div className="absolute top-2 right-2 bg-primary text-white rounded-full p-1">
+            <Check className="w-4 h-4" />
+          </div>
+        )}
+
+        <div
+          className="aspect-[1.75/1] w-full"
+          style={{
+            backgroundColor: bg ? undefined : "#f3f4f6",
+            backgroundImage: bg ? `url(${bg})` : undefined,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            color: fc,
+            fontFamily: ff,
+          }}
+        >
+          <div className="w-full h-full px-4 py-3 flex items-center justify-between gap-4">
+            {data.logo ? (
+              <img
+                src={data.logo}
+                alt="Logo"
+                className="w-14 h-14 rounded-full object-cover border border-white/40 shadow"
+              />
+            ) : (
+              <div />
+            )}
+
+            <div className="flex flex-col text-right leading-snug">
+              <div className="font-semibold" style={{ fontSize: fs + 4 }}>
+                {data.name || "Your Name"}
               </div>
-            ))}
+              <div style={{ color: accent, fontSize: fs + 2 }}>
+                {data.title || "Job Title"}
+              </div>
+              <div className="opacity-80" style={{ fontSize: Math.max(14, fs) }}>
+                {data.company || "Company"}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+          <p className="text-white font-medium text-sm">{t.name}</p>
+        </div>
+      </button>
+    </div>
+  );
+})}
+
           </div>
         )}
         {/* Pagination controls */}
